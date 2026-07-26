@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= @supplier.name %> - 供应商详情</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { display: inline; margin-right: 20px; }
+    .header .actions { float: right; }
+    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
+    .header .btn:hover { background: #0056b3; }
+    .header .btn-danger { background: #dc3545; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    .info-row { margin-bottom: 10px; }
+    .info-label { display: inline-block; width: 120px; font-weight: bold; color: #666; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+    .badge-active { background: #d4edda; color: #155724; }
+    .badge-inactive { background: #f8d7da; color: #721c24; }
+    .badge-blacklisted { background: #343a40; color: #fff; }
+    .badge-a { background: #cce5ff; color: #004085; }
+    .badge-b { background: #fff3cd; color: #856404; }
+    .badge-c { background: #e2e3e5; color: #383d41; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #f8f9fa; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><%= @supplier.name %></h1>
+    <div class="actions">
+      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
+      <%= link_to '返回列表', suppliers_path, class: 'btn' %>
+      <%= link_to '编辑', edit_supplier_path(@supplier), class: 'btn' %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>基本信息</h2>
+    <div class="info-row"><span class="info-label">编码:</span> <%= @supplier.code %></div>
+    <div class="info-row"><span class="info-label">简称:</span> <%= @supplier.short_name || '-' %></div>
+    <div class="info-row"><span class="info-label">类型:</span> <%= @supplier.display_type %></div>
+    <div class="info-row"><span class="info-label">等级:</span> <span class="badge badge-<%= @supplier.level %>"><%= @supplier.display_level %></span></div>
+    <div class="info-row"><span class="info-label">状态:</span> <span class="badge badge-<%= @supplier.status %>"><%= @supplier.display_status %></span></div>
+    <div class="info-row"><span class="info-label">创建时间:</span> <%= @supplier.created_at.strftime('%Y-%m-%d %H:%M') %></div>
+  </div>
+
+  <div class="card">
+    <h2>联系方式</h2>
+    <div class="info-row"><span class="info-label">联系人:</span> <%= @supplier.contact_person || '-' %></div>
+    <div class="info-row"><span class="info-label">电话:</span> <%= @supplier.phone || '-' %></div>
+    <div class="info-row"><span class="info-label">邮箱:</span> <%= @supplier.email || '-' %></div>
+    <div class="info-row"><span class="info-label">地址:</span> <%= @supplier.address || '-' %></div>
+  </div>
+
+  <div class="card">
+    <h2>财务信息</h2>
+    <div class="info-row"><span class="info-label">开户银行:</span> <%= @supplier.bank_name || '-' %></div>
+    <div class="info-row"><span class="info-label">银行账号:</span> <%= @supplier.bank_account || '-' %></div>
+    <div class="info-row"><span class="info-label">税号:</span> <%= @supplier.tax_number || '-' %></div>
+  </div>
+
+  <div class="card">
+    <h2>备注</h2>
+    <p><%= @supplier.remark || '无' %></p>
+  </div>
+</body>
+</html>

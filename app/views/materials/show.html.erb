@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= @material.name %> - 材质详情</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { display: inline; margin-right: 20px; }
+    .header .actions { float: right; }
+    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
+    .header .btn:hover { background: #0056b3; }
+    .header .btn-danger { background: #dc3545; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    .info-row { margin-bottom: 10px; }
+    .info-label { display: inline-block; width: 120px; font-weight: bold; color: #666; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #f8f9fa; }
+    .btn-small { padding: 4px 10px; font-size: 12px; }
+    .price-up { color: #28a745; font-weight: bold; }
+    .price-down { color: #dc3545; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><%= @material.name %> - 材质详情</h1>
+    <div class="actions">
+      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
+      <%= link_to '返回列表', materials_path, class: 'btn' %>
+      <%= link_to '编辑', edit_material_path(@material), class: 'btn' %>
+      <%= link_to '添加价格记录', new_material_material_price_path(@material), class: 'btn' %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>基本信息</h2>
+    <div class="info-row">
+      <span class="info-label">名称:</span>
+      <%= @material.name %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">编码:</span>
+      <%= @material.code %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">类型:</span>
+      <%= case @material.kind when 'metal' then '金属' when 'gemstone' then '宝石' when 'other' then '其他' else @material.kind end %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">单位:</span>
+      <%= @material.unit %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">密度:</span>
+      <%= @material.density || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">当前价格:</span>
+      <%= @material.latest_price ? "#{@material.latest_price.price_per_unit} #{@material.latest_price.currency}" : '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">描述:</span>
+      <%= @material.description || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">创建时间:</span>
+      <%= @material.created_at.strftime('%Y-%m-%d %H:%M') %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>价格历史</h2>
+    <% if @material.material_prices.empty? %>
+      <p>暂无价格记录</p>
+    <% else %>
+      <table>
+        <tr>
+          <th>日期</th>
+          <th>单价</th>
+          <th>币种</th>
+          <th>来源</th>
+          <th>操作</th>
+        </tr>
+        <% @material.material_prices.order(effective_date: :desc).each do |price| %>
+        <tr>
+          <td><%= link_to price.effective_date.strftime('%Y-%m-%d'), material_price_path(price) %></td>
+          <td><%= price.price_per_unit %></td>
+          <td><%= price.currency %></td>
+          <td><%= price.source || '-' %></td>
+          <td>
+            <%= link_to '查看', material_price_path(price), class: 'btn btn-small' %>
+            <%= link_to '删除', material_price_path(price), method: :delete, data: { confirm: '确认删除?' }, class: 'btn btn-danger btn-small' %>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    <% end %>
+  </div>
+</body>
+</html>

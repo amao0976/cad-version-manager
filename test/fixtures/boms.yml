@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  design_project: one
+  design_drawing: one
+  name: MyString
+  description: MyText
+  revision: MyString
+  status: MyString
+  created_by: one
+
+two:
+  design_project: two
+  design_drawing: two
+  name: MyString
+  description: MyText
+  revision: MyString
+  status: MyString
+  created_by: two

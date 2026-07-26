@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>序列号管理</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { display: inline; margin-right: 20px; }
+    .header .actions { float: right; }
+    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
+    .header .btn:hover { background: #0056b3; }
+    .header .btn-danger { background: #dc3545; }
+    .header .btn-danger:hover { background: #c82333; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #f8f9fa; }
+    .status-in_stock { color: #28a745; font-weight: bold; }
+    .status-sold { color: #dc3545; font-weight: bold; }
+    .status-returned { color: #ffc107; font-weight: bold; }
+    .status-scrapped { color: #6c757d; font-weight: bold; }
+    .btn-small { padding: 4px 10px; font-size: 12px; }
+    .search-bar { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; display: flex; gap: 15px; align-items: center; }
+    .search-bar label { font-weight: bold; }
+    .search-bar input[type="text"] { padding: 8px; border: 1px solid #ddd; border-radius: 5px; min-width: 300px; }
+    .search-bar .btn { margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>序列号管理</h1>
+    <div class="actions">
+      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
+      <%= link_to '新建序列号', new_serial_number_path, class: 'btn' %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>序列号列表</h2>
+    <div class="search-bar">
+      <%= form_tag serial_numbers_path, method: :get do %>
+        <label>搜索：</label>
+        <%= text_field_tag :code, params[:code], placeholder: '按编码搜索' %>
+        <%= submit_tag '搜索', class: 'btn' %>
+        <% if params[:code].present? %>
+          <%= link_to '重置', serial_numbers_path, class: 'btn' %>
+        <% end %>
+      <% end %>
+    </div>
+    <% if @serial_numbers.empty? %>
+      <p>暂无序列号数据</p>
+    <% else %>
+      <table>
+        <tr>
+          <th>编码</th>
+          <th>证书号</th>
+          <th>变体</th>
+          <th>批次</th>
+          <th>状态</th>
+          <th>售出时间</th>
+          <th>操作</th>
+        </tr>
+        <% @serial_numbers.each do |sn| %>
+        <tr>
+          <td><%= link_to sn.code, serial_number_path(sn) %></td>
+          <td><%= sn.certificate_no || '-' %></td>
+          <td><%= sn.variant&.sku_code || '-' %></td>
+          <td><%= sn.batch&.number || '-' %></td>
+          <td><span class="status-<%= sn.status %>"><%= case sn.status when 'in_stock' then '在库' when 'sold' then '已售出' when 'returned' then '已退货' when 'scrapped' then '已报废' end %></span></td>
+          <td><%= sn.sold_at&.strftime('%Y-%m-%d %H:%M') || '-' %></td>
+          <td>
+            <%= link_to '查看', serial_number_path(sn), class: 'btn btn-small' %>
+            <%= link_to '编辑', edit_serial_number_path(sn), class: 'btn btn-small' %>
+            <%= link_to '删除', serial_number_path(sn), method: :delete, data: { confirm: '确认删除?' }, class: 'btn btn-danger btn-small' %>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    <% end %>
+  </div>
+</body>
+</html>

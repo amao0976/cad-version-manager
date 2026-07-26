@@ -1,0 +1,42 @@
+test:
+  service: Disk
+  root: <%= Rails.root.join("tmp/storage") %>
+
+local:
+  service: Disk
+  root: <%= Rails.root.join("storage") %>
+
+amazon:
+  service: S3
+  access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] %>
+  secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] %>
+  region: <%= ENV['AWS_REGION'] || 'us-east-1' %>
+  bucket: <%= ENV['AWS_BUCKET'] %>
+  endpoint: <%= ENV['AWS_ENDPOINT'] %>
+  force_path_style: <%= ENV['AWS_FORCE_PATH_STYLE'] == 'true' %>
+
+aliyun:
+  service: AliyunOSS
+  access_key_id: <%= ENV['ALIYUN_ACCESS_KEY_ID'] %>
+  access_key_secret: <%= ENV['ALIYUN_ACCESS_KEY_SECRET'] %>
+  bucket: <%= ENV['ALIYUN_BUCKET'] %>
+  endpoint: <%= ENV['ALIYUN_ENDPOINT'] %>
+
+qiniu:
+  service: Qiniu
+  access_key: <%= ENV['QINIU_ACCESS_KEY'] %>
+  secret_key: <%= ENV['QINIU_SECRET_KEY'] %>
+  bucket: <%= ENV['QINIU_BUCKET'] %>
+  domain: <%= ENV['QINIU_DOMAIN'] %>
+
+custom:
+  service: CustomDisk
+  root: <%= ENV['STORAGE_ROOT'] || Rails.root.join("storage") %>
+  folder_structure: project_drawing_version
+
+ugreen:
+  service: WebDAVStorage
+  url: <%= ENV['UGREEN_WEBDAV_URL'] %>
+  username: <%= ENV['UGREEN_WEBDAV_USERNAME'] %>
+  password: <%= ENV['UGREEN_WEBDAV_PASSWORD'] %>
+  folder_structure: project_drawing_version

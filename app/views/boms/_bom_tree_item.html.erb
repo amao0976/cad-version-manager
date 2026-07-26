@@ -1,0 +1,28 @@
+<div class="tree-item level-<%= bom_tree_item.level %>">
+  <% if bom_tree_item.has_sub_items? %>
+    <span class="tree-expand">[+]</span>
+  <% else %>
+    <span class="tree-indent"></span>
+  <% end %>
+  <div class="tree-icon">📦</div>
+  <div class="tree-content">
+    <div class="tree-info">
+      <div class="tree-info-item"><span class="tree-info-label">编号:</span><strong><%= bom_tree_item.part_number %></strong></div>
+      <div class="tree-info-item"><span class="tree-info-label">名称:</span><%= bom_tree_item.part_name %></div>
+      <div class="tree-info-item"><span class="tree-info-label">数量:</span><strong><%= bom_tree_item.quantity %></strong> <%= bom_tree_item.unit %></div>
+      <div class="tree-info-item"><span class="tree-info-label">材质:</span><%= bom_tree_item.material || '-' %></div>
+      <div class="tree-info-item"><span class="tree-info-label">来源:</span><span class="badge badge-<%= bom_tree_item.source %>"><%= BomItem.sources[bom_tree_item.source.to_sym] %></span></div>
+      <% if bom_tree_item.design_drawing %>
+        <div class="tree-info-item"><span class="tree-info-label">图纸:</span><%= bom_tree_item.design_drawing.name %></div>
+      <% end %>
+    </div>
+    <div>
+      <%= link_to '删除', bom_delete_item_path(bom, bom_tree_item), method: :delete, data: { confirm: '确认删除?' }, class: 'btn btn-danger btn-small' %>
+    </div>
+  </div>
+  <% if bom_tree_item.has_sub_items? %>
+    <div class="tree-children">
+      <%= render partial: 'bom_tree_item', collection: bom_tree_item.sub_items, locals: { bom: bom } %>
+    </div>
+  <% end %>
+</div>

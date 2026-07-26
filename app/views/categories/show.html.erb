@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= @category.name %> - 分类详情</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { display: inline; margin-right: 20px; }
+    .header .actions { float: right; }
+    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
+    .header .btn:hover { background: #0056b3; }
+    .header .btn-danger { background: #dc3545; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    .info-row { margin-bottom: 10px; }
+    .info-label { display: inline-block; width: 120px; font-weight: bold; color: #666; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #f8f9fa; }
+    .status-draft { color: #ffc107; font-weight: bold; }
+    .status-published { color: #28a745; font-weight: bold; }
+    .status-offline { color: #6c757d; font-weight: bold; }
+    .btn-small { padding: 4px 10px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><%= @category.name %> - 分类详情</h1>
+    <div class="actions">
+      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
+      <%= link_to '返回列表', categories_path, class: 'btn' %>
+      <%= link_to '编辑', edit_category_path(@category), class: 'btn' %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>基本信息</h2>
+    <div class="info-row">
+      <span class="info-label">排序号:</span>
+      <%= @category.sort_order %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">名称:</span>
+      <%= @category.name %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">编码:</span>
+      <%= @category.code %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">父级分类:</span>
+      <%= @category.parent&.name || '顶级分类' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">层级:</span>
+      L<%= @category.level %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">描述:</span>
+      <%= @category.description || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">创建时间:</span>
+      <%= @category.created_at.strftime('%Y-%m-%d %H:%M') %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>子分类</h2>
+    <% if @category.children.empty? %>
+      <p>暂无子分类</p>
+    <% else %>
+      <table>
+        <tr>
+          <th>排序号</th>
+          <th>名称</th>
+          <th>编码</th>
+          <th>产品数</th>
+          <th>操作</th>
+        </tr>
+        <% @category.children.order(:sort_order).each do |child| %>
+        <tr>
+          <td><%= child.sort_order %></td>
+          <td><%= link_to child.name, category_path(child) %></td>
+          <td><%= child.code %></td>
+          <td><%= child.products.count %></td>
+          <td>
+            <%= link_to '查看', category_path(child), class: 'btn btn-small' %>
+            <%= link_to '编辑', edit_category_path(child), class: 'btn btn-small' %>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    <% end %>
+  </div>
+
+  <div class="card">
+    <h2>产品列表</h2>
+    <% if @category.products.empty? %>
+      <p>暂无产品</p>
+    <% else %>
+      <table>
+        <tr>
+          <th>产品编码</th>
+          <th>名称</th>
+          <th>主材质</th>
+          <th>状态</th>
+          <th>操作</th>
+        </tr>
+        <% @category.products.each do |product| %>
+        <tr>
+          <td><%= link_to product.product_code, product_path(product) %></td>
+          <td><%= product.name %></td>
+          <td><%= product.main_material&.name || '-' %></td>
+          <td><span class="status-<%= product.status %>"><%= case product.status when 'draft' then '草稿' when 'published' then '已发布' when 'offline' then '已下架' end %></span></td>
+          <td>
+            <%= link_to '查看', product_path(product), class: 'btn btn-small' %>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    <% end %>
+  </div>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>图纸管理</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { display: inline; margin-right: 20px; }
+    .header .actions { float: right; }
+    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
+    .header .btn:hover { background: #0056b3; }
+    .header .btn-danger { background: #dc3545; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #f8f9fa; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+    .badge-prt { background: #cce5ff; color: #004085; }
+    .badge-dft { background: #d4edda; color: #155724; }
+    .badge-step { background: #fff3cd; color: #856404; }
+    .badge-asm { background: #f8d7da; color: #721c24; }
+    .badge-dwg { background: #e2e3e5; color: #383d41; }
+    .btn-small { padding: 4px 10px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>图纸管理</h1>
+    <div class="actions">
+      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
+      <%= link_to '新建图纸', new_design_drawing_path, class: 'btn' %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>图纸列表</h2>
+    <% if @drawings.empty? %>
+      <p>暂无图纸</p>
+    <% else %>
+      <table>
+        <tr>
+          <th>名称</th>
+          <th>项目</th>
+          <th>类型</th>
+          <th>最新版本</th>
+          <th>版本数</th>
+          <th>创建人</th>
+          <th>操作</th>
+        </tr>
+        <% @drawings.each do |drawing| %>
+        <tr>
+          <td><%= link_to drawing.name, design_drawing_path(drawing) %></td>
+          <td><%= drawing.design_project&.name || '-' %></td>
+          <td><span class="badge badge-<%= drawing.file_type %>"><%= drawing.file_type.upcase %></span></td>
+          <td><%= drawing.latest_version&.version_number || '-' %></td>
+          <td><%= drawing.drawing_versions.count %></td>
+          <td><%= drawing.created_by&.name || '-' %></td>
+          <td>
+            <%= link_to '查看', design_drawing_path(drawing), class: 'btn btn-small' %>
+            <%= link_to '上传版本', design_drawing_upload_version_path(drawing), class: 'btn btn-small' %>
+            <%= link_to '编辑', edit_design_drawing_path(drawing), class: 'btn btn-small' %>
+            <%= link_to '删除', design_drawing_path(drawing), method: :delete, data: { confirm: '确认删除?' }, class: 'btn btn-danger btn-small' %>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    <% end %>
+  </div>
+</body>
+</html>

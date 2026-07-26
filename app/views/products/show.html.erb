@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= @product.name %> - 产品详情</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { display: inline; margin-right: 20px; }
+    .header .actions { float: right; }
+    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
+    .header .btn:hover { background: #0056b3; }
+    .header .btn-danger { background: #dc3545; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    .info-row { margin-bottom: 10px; }
+    .info-label { display: inline-block; width: 120px; font-weight: bold; color: #666; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #f8f9fa; }
+    .status-draft { color: #ffc107; font-weight: bold; }
+    .status-published { color: #28a745; font-weight: bold; }
+    .status-offline { color: #6c757d; font-weight: bold; }
+    .status-active { color: #28a745; font-weight: bold; }
+    .status-inactive { color: #6c757d; font-weight: bold; }
+    .status-approved { color: #17a2b8; font-weight: bold; }
+    .status-released { color: #28a745; font-weight: bold; }
+    .status-archived { color: #6c757d; font-weight: bold; }
+    .btn-small { padding: 4px 10px; font-size: 12px; }
+    .btn-success { background: #28a745 !important; }
+    .btn-success:hover { background: #218838 !important; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><%= @product.name %> - 产品详情</h1>
+    <div class="actions">
+      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
+      <%= link_to '返回列表', products_path, class: 'btn' %>
+      <%= link_to '编辑', edit_product_path(@product), class: 'btn' %>
+      <%= link_to '计算价格', calculate_price_product_path(@product), class: 'btn btn-success' %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>基本信息</h2>
+    <div class="info-row">
+      <span class="info-label">产品编码:</span>
+      <%= @product.product_code %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">名称:</span>
+      <%= @product.name %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">分类:</span>
+      <%= @product.category&.name || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">主材质:</span>
+      <%= @product.main_material&.name || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">基础克重:</span>
+      <%= @product.base_weight ? "#{@product.base_weight}g" : '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">设计图:</span>
+      <%= @product.design_drawing&.name || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">状态:</span>
+      <span class="status-<%= @product.status %>"><%= case @product.status when 'draft' then '草稿' when 'published' then '已发布' when 'offline' then '已下架' end %></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">描述:</span>
+      <%= @product.description || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">创建时间:</span>
+      <%= @product.created_at.strftime('%Y-%m-%d %H:%M') %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>BOM列表</h2>
+    <% if @product_boms.empty? %>
+      <p>暂无BOM</p>
+    <% else %>
+      <table>
+        <tr>
+          <th>名称</th>
+          <th>版本</th>
+          <th>状态</th>
+          <th>物料数量</th>
+          <th>创建时间</th>
+          <th>操作</th>
+        </tr>
+        <% @product_boms.each do |bom| %>
+        <tr>
+          <td><%= link_to bom.name, bom_path(bom) %></td>
+          <td><%= bom.revision %></td>
+          <td><span class="status-<%= bom.status %>"><%= case bom.status when 'draft' then '草稿' when 'approved' then '已审批' when 'released' then '已发布' when 'archived' then '已归档' end %></span></td>
+          <td><%= bom.bom_items.count %></td>
+          <td><%= bom.created_at.strftime('%Y-%m-%d') %></td>
+          <td>
+            <%= link_to '查看', bom_path(bom), class: 'btn btn-small' %>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    <% end %>
+  </div>
+
+  <div class="card">
+    <h2>变体列表</h2>
+    <div style="margin-bottom: 15px;">
+      <%= link_to '新建变体', new_product_variant_path(@product), class: 'btn' %>
+    </div>
+    <% if @product.variants.empty? %>
+      <p>暂无变体</p>
+    <% else %>
+      <table>
+        <tr>
+          <th>SKU编码</th>
+          <th>材质</th>
+          <th>尺寸</th>
+          <th>颜色</th>
+          <th>宝石</th>
+          <th>重量</th>
+          <th>状态</th>
+          <th>操作</th>
+        </tr>
+        <% @product.variants.each do |variant| %>
+        <tr>
+          <td><%= link_to variant.sku_code, product_variant_path(@product, variant) %></td>
+          <td><%= variant.material&.name || '-' %></td>
+          <td><%= variant.size || '-' %></td>
+          <td><%= variant.color || '-' %></td>
+          <td><%= variant.gemstone || '-' %></td>
+          <td><%= variant.weight ? "#{variant.weight}g" : '-' %></td>
+          <td><span class="status-<%= variant.status %>"><%= case variant.status when 'active' then '启用' when 'inactive' then '停用' end %></span></td>
+          <td>
+            <%= link_to '查看', product_variant_path(@product, variant), class: 'btn btn-small' %>
+            <%= link_to '编辑', edit_product_variant_path(@product, variant), class: 'btn btn-small' %>
+            <%= link_to '删除', product_variant_path(@product, variant), method: :delete, data: { confirm: '确认删除?' }, class: 'btn btn-danger btn-small' %>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    <% end %>
+  </div>
+
+  <div class="card">
+    <h2>批次列表</h2>
+    <% if @batches.empty? %>
+      <p>暂无批次</p>
+    <% else %>
+      <table>
+        <tr>
+          <th>批次号</th>
+          <th>变体</th>
+          <th>数量</th>
+          <th>生产日期</th>
+          <th>状态</th>
+          <th>序列号数</th>
+          <th>操作</th>
+        </tr>
+        <% @batches.each do |batch| %>
+        <tr>
+          <td><%= link_to batch.number, variant_batch_path(batch.variant, batch) %></td>
+          <td><%= batch.variant&.sku_code || '-' %></td>
+          <td><%= batch.quantity %></td>
+          <td><%= batch.production_date&.strftime('%Y-%m-%d') || '-' %></td>
+          <td><span class="status-<%= batch.status %>"><%= case batch.status when 'in_production' then '生产中' when 'in_stock' then '已入库' when 'sold_out' then '已售罄' when 'scrapped' then '已报废' end %></span></td>
+          <td><%= batch.serial_numbers.count %></td>
+          <td>
+            <%= link_to '查看', variant_batch_path(batch.variant, batch), class: 'btn btn-small' %>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    <% end %>
+  </div>
+</body>
+</html>

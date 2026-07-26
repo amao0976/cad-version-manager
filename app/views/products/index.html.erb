@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>产品管理</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { display: inline; margin-right: 20px; }
+    .header .actions { float: right; }
+    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
+    .header .btn:hover { background: #0056b3; }
+    .header .btn-danger { background: #dc3545; }
+    .header .btn-danger:hover { background: #c82333; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #f8f9fa; }
+    .status-draft { color: #ffc107; font-weight: bold; }
+    .status-published { color: #28a745; font-weight: bold; }
+    .status-offline { color: #6c757d; font-weight: bold; }
+    .btn-small { padding: 4px 10px; font-size: 12px; }
+    .filter-bar { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; display: flex; gap: 15px; align-items: center; }
+    .filter-bar label { font-weight: bold; }
+    .filter-bar select { padding: 8px; border: 1px solid #ddd; border-radius: 5px; min-width: 200px; }
+    .filter-bar .btn { margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>产品管理</h1>
+    <div class="actions">
+      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
+      <%= link_to '新建产品', new_product_path, class: 'btn' %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>产品列表</h2>
+    <div class="filter-bar">
+      <%= form_tag products_path, method: :get do %>
+        <label>分类筛选：</label>
+        <%= select_tag :category_id, options_from_collection_for_select(@categories, :id, :name, params[:category_id]), include_blank: '全部分类' %>
+        <%= submit_tag '筛选', class: 'btn' %>
+      <% end %>
+    </div>
+    <% if @products.empty? %>
+      <p>暂无产品数据</p>
+    <% else %>
+      <table>
+        <tr>
+          <th>产品编码</th>
+          <th>名称</th>
+          <th>分类</th>
+          <th>主材质</th>
+          <th>基础克重</th>
+          <th>状态</th>
+          <th>变体数</th>
+          <th>操作</th>
+        </tr>
+        <% @products.each do |product| %>
+        <tr>
+          <td><%= link_to product.product_code, product_path(product) %></td>
+          <td><%= product.name %></td>
+          <td><%= product.category&.name || '-' %></td>
+          <td><%= product.main_material&.name || '-' %></td>
+          <td><%= product.base_weight ? "#{product.base_weight}g" : '-' %></td>
+          <td><span class="status-<%= product.status %>"><%= case product.status when 'draft' then '草稿' when 'published' then '已发布' when 'offline' then '已下架' end %></span></td>
+          <td><%= product.variants.count %></td>
+          <td>
+            <%= link_to '查看', product_path(product), class: 'btn btn-small' %>
+            <%= link_to '编辑', edit_product_path(product), class: 'btn btn-small' %>
+            <%= link_to '计算价格', calculate_price_product_path(product), class: 'btn btn-small' %>
+            <% if product.status == 'draft' %>
+              <%= link_to '发布', publish_product_path(product), class: 'btn btn-small' %>
+            <% end %>
+            <% if product.status == 'published' %>
+              <%= link_to '下架', offline_product_path(product), class: 'btn btn-small' %>
+            <% end %>
+            <% if product.status == 'offline' %>
+              <%= link_to '重新发布', publish_product_path(product), class: 'btn btn-small' %>
+            <% end %>
+            <%= link_to '删除', product_path(product), method: :delete, data: { confirm: '确认删除?' }, class: 'btn btn-danger btn-small' %>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    <% end %>
+  </div>
+</body>
+</html>

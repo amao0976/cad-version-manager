@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= yield(:title) || 'CAD 设计图纸版本管理系统' %></title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag "application", media: "all" %>
+  <%= javascript_importmap_tags %>
+</head>
+<body>
+  <% if notice %>
+    <div style="background: #d4edda; color: #155724; padding: 10px 20px; margin: 10px 0; border-radius: 5px;">
+      <%= notice %>
+    </div>
+  <% end %>
+  <% if alert %>
+    <div style="background: #f8d7da; color: #721c24; padding: 10px 20px; margin: 10px 0; border-radius: 5px;">
+      <%= alert %>
+    </div>
+  <% end %>
+  <%= yield %>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= @serial_number.code %> - 序列号详情</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { display: inline; margin-right: 20px; }
+    .header .actions { float: right; }
+    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
+    .header .btn:hover { background: #0056b3; }
+    .header .btn-danger { background: #dc3545; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    .info-row { margin-bottom: 10px; }
+    .info-label { display: inline-block; width: 120px; font-weight: bold; color: #666; }
+    .status-in_stock { color: #28a745; font-weight: bold; }
+    .status-sold { color: #dc3545; font-weight: bold; }
+    .status-returned { color: #ffc107; font-weight: bold; }
+    .status-scrapped { color: #6c757d; font-weight: bold; }
+    .trace-list { list-style: none; padding: 0; margin: 15px 0; }
+    .trace-item { padding: 10px; border-left: 3px solid #007bff; margin-bottom: 10px; background: #f8f9fa; padding-left: 15px; }
+    .trace-time { color: #666; font-size: 12px; }
+    .trace-title { font-weight: bold; margin-bottom: 5px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><%= @serial_number.code %> - 序列号详情</h1>
+    <div class="actions">
+      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
+      <%= link_to '返回列表', serial_numbers_path, class: 'btn' %>
+      <%= link_to '编辑', edit_serial_number_path(@serial_number), class: 'btn' %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>基本信息</h2>
+    <div class="info-row">
+      <span class="info-label">编码:</span>
+      <%= @serial_number.code %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">证书号:</span>
+      <%= @serial_number.certificate_no || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">所属产品:</span>
+      <%= @serial_number.variant&.product&.name || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">变体:</span>
+      <%= @serial_number.variant&.sku_code || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">批次:</span>
+      <%= @serial_number.batch&.number || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">状态:</span>
+      <span class="status-<%= @serial_number.status %>"><%= case @serial_number.status when 'in_stock' then '在库' when 'sold' then '已售出' when 'returned' then '已退货' when 'scrapped' then '已报废' end %></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">售出时间:</span>
+      <%= @serial_number.sold_at&.strftime('%Y-%m-%d %H:%M') || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">创建时间:</span>
+      <%= @serial_number.created_at.strftime('%Y-%m-%d %H:%M') %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>追溯信息</h2>
+    <ul class="trace-list">
+      <li class="trace-item">
+        <div class="trace-title">入库</div>
+        <div>批次：<%= @serial_number.batch&.number || '-' %></div>
+        <div class="trace-time"><%= @serial_number.batch&.created_at&.strftime('%Y-%m-%d %H:%M') || '-' %></div>
+      </li>
+      <li class="trace-item">
+        <div class="trace-title">生产</div>
+        <div>生产日期：<%= @serial_number.batch&.production_date&.strftime('%Y-%m-%d') || '-' %></div>
+        <div class="trace-time">生产数量：<%= @serial_number.batch&.quantity || '-' %></div>
+      </li>
+      <li class="trace-item">
+        <div class="trace-title">创建</div>
+        <div>序列号创建</div>
+        <div class="trace-time"><%= @serial_number.created_at.strftime('%Y-%m-%d %H:%M') %></div>
+      </li>
+    </ul>
+  </div>
+</body>
+</html>

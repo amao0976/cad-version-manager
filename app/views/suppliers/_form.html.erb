@@ -1,0 +1,74 @@
+<%= form_for @supplier, url: @supplier.new_record? ? suppliers_path : supplier_path(@supplier), method: @supplier.new_record? ? :post : :patch do |f| %>
+  <% if @supplier.errors.any? %>
+    <div class="errors">
+      <% @supplier.errors.full_messages.each do |msg| %>
+        <p><%= msg %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= f.label :name, '供应商名称' %>
+    <%= f.text_field :name, required: true %>
+  </div>
+  <div class="form-group">
+    <%= f.label :code, '供应商编码' %>
+    <%= f.text_field :code, required: true %>
+  </div>
+  <div class="form-group">
+    <%= f.label :short_name, '简称' %>
+    <%= f.text_field :short_name %>
+  </div>
+  <div class="form-group">
+    <%= f.label :supplier_type, '供应商类型' %>
+    <%= f.select :supplier_type, Supplier.supplier_types.map { |k, v| [v, k] } %>
+  </div>
+  <div class="form-group">
+    <%= f.label :level, '等级' %>
+    <%= f.select :level, Supplier.levels.map { |k, v| [v, k] } %>
+  </div>
+  <div class="form-group">
+    <%= f.label :status, '状态' %>
+    <%= f.select :status, Supplier.statuses.map { |k, v| [v, k] } %>
+  </div>
+
+  <h3 style="margin-top: 25px; color: #007bff;">联系信息</h3>
+  <div class="form-group">
+    <%= f.label :contact_person, '联系人' %>
+    <%= f.text_field :contact_person %>
+  </div>
+  <div class="form-group">
+    <%= f.label :phone, '电话' %>
+    <%= f.text_field :phone %>
+  </div>
+  <div class="form-group">
+    <%= f.label :email, '邮箱' %>
+    <%= f.text_field :email %>
+  </div>
+  <div class="form-group">
+    <%= f.label :address, '地址' %>
+    <%= f.text_field :address %>
+  </div>
+
+  <h3 style="margin-top: 25px; color: #007bff;">财务信息</h3>
+  <div class="form-group">
+    <%= f.label :bank_name, '开户银行' %>
+    <%= f.text_field :bank_name %>
+  </div>
+  <div class="form-group">
+    <%= f.label :bank_account, '银行账号' %>
+    <%= f.text_field :bank_account %>
+  </div>
+  <div class="form-group">
+    <%= f.label :tax_number, '税号' %>
+    <%= f.text_field :tax_number %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :remark, '备注' %>
+    <%= f.text_area :remark %>
+  </div>
+  <div class="form-group">
+    <%= f.submit (@supplier.new_record? ? '创建供应商' : '更新供应商'), class: 'btn-submit' %>
+  </div>
+<% end %>

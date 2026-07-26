@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= @price_rule.name %> - 定价规则详情</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { display: inline; margin-right: 20px; }
+    .header .actions { float: right; }
+    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
+    .header .btn:hover { background: #0056b3; }
+    .header .btn-danger { background: #dc3545; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    .info-row { margin-bottom: 10px; }
+    .info-label { display: inline-block; width: 120px; font-weight: bold; color: #666; }
+    .status-active { color: #28a745; font-weight: bold; }
+    .status-inactive { color: #6c757d; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><%= @price_rule.name %> - 定价规则详情</h1>
+    <div class="actions">
+      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
+      <%= link_to '返回列表', price_rules_path, class: 'btn' %>
+      <%= link_to '编辑', edit_price_rule_path(@price_rule), class: 'btn' %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>基本信息</h2>
+    <div class="info-row">
+      <span class="info-label">名称:</span>
+      <%= @price_rule.name %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">适用分类:</span>
+      <%= @price_rule.category&.name || '全部分类' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">适用材质:</span>
+      <%= @price_rule.material&.name || '全部材质' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">工费:</span>
+      <%= @price_rule.labor_cost ? "#{@price_rule.labor_cost}" : '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">加价率:</span>
+      <%= @price_rule.markup_rate ? "#{(@price_rule.markup_rate * 100).round(1)}%" : '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">生效日期:</span>
+      <%= @price_rule.effective_from&.strftime('%Y-%m-%d') || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">失效日期:</span>
+      <%= @price_rule.effective_to&.strftime('%Y-%m-%d') || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">启用:</span>
+      <%= @price_rule.active ? '<span class="status-active">是</span>' : '<span class="status-inactive">否</span>' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">备注:</span>
+      <%= @price_rule.remark || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">创建时间:</span>
+      <%= @price_rule.created_at.strftime('%Y-%m-%d %H:%M') %>
+    </div>
+  </div>
+</body>
+</html>

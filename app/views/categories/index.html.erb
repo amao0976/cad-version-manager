@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>分类管理</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { display: inline; margin-right: 20px; }
+    .header .actions { float: right; }
+    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
+    .header .btn:hover { background: #0056b3; }
+    .header .btn-danger { background: #dc3545; }
+    .header .btn-danger:hover { background: #c82333; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #f8f9fa; }
+    .tree-item {  }
+    .tree-level-0 { padding-left: 0; }
+    .tree-level-1 { padding-left: 30px; }
+    .tree-level-2 { padding-left: 60px; }
+    .tree-level-3 { padding-left: 90px; }
+    .btn-small { padding: 4px 10px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>分类管理</h1>
+    <div class="actions">
+      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
+      <%= link_to '新建分类', new_category_path, class: 'btn' %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>分类列表</h2>
+    <% if @categories.empty? %>
+      <p>暂无分类数据</p>
+    <% else %>
+      <table>
+        <tr>
+          <th>排序号</th>
+          <th>名称</th>
+          <th>编码</th>
+          <th>层级</th>
+          <th>产品数</th>
+          <th>操作</th>
+        </tr>
+        <% @categories.where(parent_id: nil).order(:sort_order).each do |category| %>
+          <tr class="tree-level-0">
+            <td><%= category.sort_order %></td>
+            <td><%= link_to category.name, category_path(category) %></td>
+            <td><%= category.code %></td>
+            <td>L<%= category.level %></td>
+            <td><%= category.products.count %></td>
+            <td>
+              <%= link_to '查看', category_path(category), class: 'btn btn-small' %>
+              <%= link_to '编辑', edit_category_path(category), class: 'btn btn-small' %>
+              <%= link_to '删除', category_path(category), method: :delete, data: { confirm: '确认删除?' }, class: 'btn btn-danger btn-small' %>
+            </td>
+          </tr>
+          <% category.children.order(:sort_order).each do |child| %>
+            <tr class="tree-level-1">
+              <td><%= child.sort_order %></td>
+              <td><%= link_to '— ' + child.name, category_path(child) %></td>
+              <td><%= child.code %></td>
+              <td>L<%= child.level %></td>
+              <td><%= child.products.count %></td>
+              <td>
+                <%= link_to '查看', category_path(child), class: 'btn btn-small' %>
+                <%= link_to '编辑', edit_category_path(child), class: 'btn btn-small' %>
+                <%= link_to '删除', category_path(child), method: :delete, data: { confirm: '确认删除?' }, class: 'btn btn-danger btn-small' %>
+              </td>
+            </tr>
+            <% child.children.order(:sort_order).each do |grandchild| %>
+              <tr class="tree-level-2">
+                <td><%= grandchild.sort_order %></td>
+                <td><%= link_to '—— ' + grandchild.name, category_path(grandchild) %></td>
+                <td><%= grandchild.code %></td>
+                <td>L<%= grandchild.level %></td>
+                <td><%= grandchild.products.count %></td>
+                <td>
+                  <%= link_to '查看', category_path(grandchild), class: 'btn btn-small' %>
+                  <%= link_to '编辑', edit_category_path(grandchild), class: 'btn btn-small' %>
+                  <%= link_to '删除', category_path(grandchild), method: :delete, data: { confirm: '确认删除?' }, class: 'btn btn-danger btn-small' %>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+        <% end %>
+      </table>
+    <% end %>
+  </div>
+</body>
+</html>

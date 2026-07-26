@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>新建定价规则</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { display: inline; margin-right: 20px; }
+    .header .btn { padding: 8px 16px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px; float: right; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+    .form-group textarea { height: 100px; }
+    .form-group input[type="checkbox"] { width: auto; }
+    .btn-submit { padding: 12px 30px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    .btn-submit:hover { background: #0056b3; }
+    .errors { color: #dc3545; margin-bottom: 15px; }
+    .form-hint { font-size: 12px; color: #666; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>新建定价规则</h1>
+    <%= link_to '返回列表', price_rules_path, class: 'btn' %>
+  </div>
+
+  <div class="card">
+    <h2>定价规则信息</h2>
+    <% if @price_rule.errors.any? %>
+      <div class="errors">
+        <% @price_rule.errors.full_messages.each do |msg| %>
+          <p><%= msg %></p>
+        <% end %>
+      </div>
+    <% end %>
+    <%= form_for @price_rule, url: price_rules_path, method: :post do |f| %>
+      <div class="form-group">
+        <%= f.label :name, '名称' %>
+        <%= f.text_field :name %>
+      </div>
+      <div class="form-group">
+        <%= f.label :category_id, '适用分类' %>
+        <%= f.collection_select :category_id, @categories, :id, :name, { include_blank: '全部分类' } %>
+      </div>
+      <div class="form-group">
+        <%= f.label :material_id, '适用材质' %>
+        <%= f.collection_select :material_id, @materials, :id, :name, { include_blank: '全部材质' } %>
+      </div>
+      <div class="form-group">
+        <%= f.label :labor_cost, '工费' %>
+        <%= f.text_field :labor_cost %>
+      </div>
+      <div class="form-group">
+        <%= f.label :markup_rate, '加价率' %>
+        <%= f.text_field :markup_rate %>
+        <div class="form-hint">小数形式，例如 0.5 表示 50%</div>
+      </div>
+      <div class="form-group">
+        <%= f.label :effective_from, '生效日期' %>
+        <%= f.date_field :effective_from %>
+      </div>
+      <div class="form-group">
+        <%= f.label :effective_to, '失效日期' %>
+        <%= f.date_field :effective_to %>
+      </div>
+      <div class="form-group">
+        <%= f.label :active, '启用' %>
+        <%= f.check_box :active %>
+      </div>
+      <div class="form-group">
+        <%= f.label :remark, '备注' %>
+        <%= f.text_area :remark %>
+      </div>
+      <div class="form-group">
+        <%= f.submit '创建定价规则', class: 'btn-submit' %>
+      </div>
+    <% end %>
+  </div>
+</body>
+</html>

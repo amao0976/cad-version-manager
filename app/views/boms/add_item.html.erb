@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>添加物料项</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { display: inline; margin-right: 20px; }
+    .header .btn { padding: 8px 16px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px; float: right; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+    .btn-submit { padding: 12px 30px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    .btn-submit:hover { background: #0056b3; }
+    .errors { color: #dc3545; margin-bottom: 15px; }
+    .row { display: flex; gap: 15px; }
+    .row .form-group { flex: 1; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>添加物料项 - <%= @bom.name %></h1>
+    <%= link_to '返回BOM详情', bom_path(@bom), class: 'btn' %>
+  </div>
+
+  <div class="card">
+    <h2>物料信息</h2>
+    <% if @item.errors.any? %>
+      <div class="errors">
+        <% @item.errors.full_messages.each do |msg| %>
+          <p><%= msg %></p>
+        <% end %>
+      </div>
+    <% end %>
+    <%= form_for @item, url: bom_create_item_path(@bom), method: :post do |f| %>
+      <div class="row">
+        <div class="form-group">
+          <%= f.label :part_number, '物料编号' %>
+          <%= f.text_field :part_number %>
+        </div>
+        <div class="form-group">
+          <%= f.label :part_name, '物料名称' %>
+          <%= f.text_field :part_name %>
+        </div>
+      </div>
+      <div class="form-group">
+        <%= f.label :design_drawing_id, '关联图纸' %>
+        <%= f.collection_select :design_drawing_id, @drawings, :id, :name, { include_blank: '不关联图纸' } %>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <%= f.label :material, '材质' %>
+          <%= f.text_field :material %>
+        </div>
+        <div class="form-group">
+          <%= f.label :specification, '规格' %>
+          <%= f.text_field :specification %>
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <%= f.label :quantity, '数量' %>
+          <%= f.number_field :quantity, value: 1, step: 0.1 %>
+        </div>
+        <div class="form-group">
+          <%= f.label :unit, '单位' %>
+          <%= f.text_field :unit, value: '件' %>
+        </div>
+        <div class="form-group">
+          <%= f.label :weight, '重量' %>
+          <%= f.number_field :weight, step: 0.001 %>
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <%= f.label :source, '来源' %>
+          <%= f.select :source, BomItem.sources.map { |k, v| [v, k] } %>
+        </div>
+        <div class="form-group">
+          <%= f.label :level, '层级' %>
+          <%= f.number_field :level, value: 1, min: 1 %>
+        </div>
+      </div>
+      <div class="form-group">
+        <%= f.submit '添加物料项', class: 'btn-submit' %>
+      </div>
+    <% end %>
+  </div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CAD 设计图纸版本管理系统</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 100px; background: #f5f5f5; }
+    .container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: inline-block; }
+    h1 { color: #333; margin-bottom: 20px; }
+    .btn { display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px; }
+    .btn:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CAD 设计图纸版本管理系统</h1>
+    <p>欢迎使用 NX/Solid Edge 设计图纸版本管理系统</p>
+    <br>
+    <% if user_signed_in? %>
+      <a href="/dashboard" class="btn">进入系统</a>
+      <%= link_to '退出登录', destroy_user_session_path, method: :delete, class: 'btn' %>
+    <% else %>
+      <%= link_to '登录', new_user_session_path, class: 'btn' %>
+      <%= link_to '注册', new_user_registration_path, class: 'btn' %>
+    <% end %>
+  </div>
+</body>
+</html>

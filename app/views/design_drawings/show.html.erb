@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= @drawing.name %></title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { display: inline; margin-right: 20px; }
+    .header .actions { float: right; }
+    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
+    .header .btn:hover { background: #0056b3; }
+    .header .btn-danger { background: #dc3545; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    .info-row { margin-bottom: 10px; }
+    .info-label { display: inline-block; width: 120px; font-weight: bold; color: #666; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #f8f9fa; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+    .badge-latest { background: #d4edda; color: #155724; }
+    .badge-approved { background: #cce5ff; color: #004085; }
+    .badge-pending { background: #fff3cd; color: #856404; }
+    .btn-small { padding: 4px 10px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><%= @drawing.name %> - 图纸详情</h1>
+    <div class="actions">
+      <%= link_to '返回列表', design_drawings_path, class: 'btn btn-danger' %>
+      <%= link_to '上传新版本', design_drawing_upload_version_path(@drawing), class: 'btn' %>
+      <%= link_to '编辑', edit_design_drawing_path(@drawing), class: 'btn' %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>基本信息</h2>
+    <div class="info-row">
+      <span class="info-label">项目:</span>
+      <%= @drawing.design_project&.name %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">类型:</span>
+      <span class="badge badge-<%= @drawing.file_type %>"><%= @drawing.file_type.upcase %></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">描述:</span>
+      <%= @drawing.description || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">创建人:</span>
+      <%= @drawing.created_by&.name || '-' %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">创建时间:</span>
+      <%= @drawing.created_at.strftime('%Y-%m-%d %H:%M') %>
+    </div>
+    <div class="info-row">
+      <span class="info-label">文件夹路径:</span>
+      <%= @latest_version ? @latest_version.folder_path : '-' %>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>版本列表</h2>
+    <% if @versions.empty? %>
+      <p>暂无版本，请上传图纸文件</p>
+    <% else %>
+      <table>
+        <tr>
+          <th>版本号</th>
+          <th>文件名</th>
+          <th>上传人</th>
+          <th>上传时间</th>
+          <th>变更日志</th>
+          <th>状态</th>
+          <th>操作</th>
+        </tr>
+        <% @versions.each do |version| %>
+        <tr>
+          <td>
+            v<%= version.version_number %>
+            <% if version.is_latest? %>
+              <span class="badge badge-latest">最新</span>
+            <% end %>
+          </td>
+          <td><%= version.file_name || '-' %></td>
+          <td><%= version.uploaded_by&.name || '-' %></td>
+          <td><%= version.created_at.strftime('%Y-%m-%d %H:%M') %></td>
+          <td><%= version.change_log || '-' %></td>
+          <td>
+            <% if version.is_approved? %>
+              <span class="badge badge-approved">已审批</span>
+            <% else %>
+              <span class="badge badge-pending">待审批</span>
+            <% end %>
+          </td>
+          <td>
+            <% if version.file.attached? %>
+              <%= link_to '下载', design_drawing_download_version_path(@drawing, version_id: version.id), class: 'btn btn-small' %>
+            <% end %>
+          </td>
+        </tr>
+        <% end %>
+      </table>
+    <% end %>
+  </div>
+</body>
+</html>
