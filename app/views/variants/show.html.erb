@@ -1,146 +1,117 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title><%= @variant.sku_code %> - 变体详情</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .header h1 { display: inline; margin-right: 20px; }
-    .header .actions { float: right; }
-    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
-    .header .btn:hover { background: #0056b3; }
-    .header .btn-danger { background: #dc3545; }
-    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
-    .info-row { margin-bottom: 10px; }
-    .info-label { display: inline-block; width: 120px; font-weight: bold; color: #666; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background: #f8f9fa; }
-    .status-active { color: #28a745; font-weight: bold; }
-    .status-inactive { color: #6c757d; font-weight: bold; }
-    .status-in_production { color: #ffc107; font-weight: bold; }
-    .status-in_stock { color: #28a745; font-weight: bold; }
-    .status-sold_out { color: #6c757d; font-weight: bold; }
-    .status-scrapped { color: #dc3545; font-weight: bold; }
-    .btn-small { padding: 4px 10px; font-size: 12px; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1><%= @variant.sku_code %> - 变体详情</h1>
-    <div class="actions">
-      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
-      <%= link_to '返回变体列表', product_variants_path(@product), class: 'btn' %>
-      <%= link_to '编辑', edit_product_variant_path(@product, @variant), class: 'btn' %>
-    </div>
-  </div>
+<% content_for :title, "#{@variant.sku_code} - 变体详情" %>
 
-  <div class="card">
-    <h2>基本信息</h2>
-    <div class="info-row">
-      <span class="info-label">所属产品:</span>
-      <%= link_to @product.name, product_path(@product) %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">SKU编码:</span>
-      <%= @variant.sku_code %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">材质:</span>
-      <%= @variant.material&.name || '-' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">尺寸:</span>
-      <%= @variant.size || '-' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">颜色:</span>
-      <%= @variant.color || '-' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">宝石:</span>
-      <%= @variant.gemstone || '-' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">重量:</span>
-      <%= @variant.weight ? "#{@variant.weight}g" : '-' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">状态:</span>
-      <span class="status-<%= @variant.status %>"><%= case @variant.status when 'active' then '启用' when 'inactive' then '停用' end %></span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">描述:</span>
-      <%= @variant.description || '-' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">创建时间:</span>
-      <%= @variant.created_at.strftime('%Y-%m-%d %H:%M') %>
-    </div>
+<div class="page-header">
+  <h1><%= @variant.sku_code %> - 变体详情</h1>
+  <div class="d-flex gap-2 mb-3">
+    <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
+    <%= link_to '返回变体列表', product_variants_path(@product), class: 'btn btn-outline-secondary' %>
+    <%= link_to '编辑', edit_product_variant_path(@product, @variant), class: 'btn btn-outline-secondary' %>
   </div>
+</div>
 
-  <div class="card">
-    <h2>批次列表</h2>
-    <div style="margin-bottom: 15px;">
-      <%= link_to '新建批次', new_variant_batch_path(@variant), class: 'btn' %>
-    </div>
-    <% if @variant.batches.empty? %>
-      <p>暂无批次</p>
-    <% else %>
-      <table>
-        <tr>
-          <th>批次号</th>
-          <th>数量</th>
-          <th>生产日期</th>
-          <th>供应商</th>
-          <th>状态</th>
-          <th>序列号数</th>
-          <th>操作</th>
-        </tr>
-        <% @variant.batches.each do |batch| %>
-        <tr>
-          <td><%= link_to batch.number, variant_batch_path(@variant, batch) %></td>
-          <td><%= batch.quantity %></td>
-          <td><%= batch.production_date&.strftime('%Y-%m-%d') || '-' %></td>
-          <td><%= batch.supplier || '-' %></td>
-          <td><span class="status-<%= batch.status %>"><%= case batch.status when 'in_production' then '生产中' when 'in_stock' then '已入库' when 'sold_out' then '已售罄' when 'scrapped' then '已报废' end %></span></td>
-          <td><%= batch.serial_numbers.count %></td>
-          <td>
-            <%= link_to '查看', variant_batch_path(@variant, batch), class: 'btn btn-small' %>
-          </td>
-        </tr>
-        <% end %>
-      </table>
-    <% end %>
+<div class="card">
+  <div class="card-header fw-bold">基本信息</div>
+  <div class="info-row">
+    <span class="info-label">所属产品:</span>
+    <%= link_to @product.name, product_path(@product) %>
   </div>
+  <div class="info-row">
+    <span class="info-label">SKU编码:</span>
+    <%= @variant.sku_code %>
+  </div>
+  <div class="info-row">
+    <span class="info-label">材质:</span>
+    <%= @variant.material&.name || '-' %>
+  </div>
+  <div class="info-row">
+    <span class="info-label">尺寸:</span>
+    <%= @variant.size || '-' %>
+  </div>
+  <div class="info-row">
+    <span class="info-label">颜色:</span>
+    <%= @variant.color || '-' %>
+  </div>
+  <div class="info-row">
+    <span class="info-label">宝石:</span>
+    <%= @variant.gemstone || '-' %>
+  </div>
+  <div class="info-row">
+    <span class="info-label">重量:</span>
+    <%= @variant.weight ? "#{@variant.weight}g" : '-' %>
+  </div>
+  <div class="info-row">
+    <span class="info-label">状态:</span>
+    <span class="status-<%= @variant.status %>"><%= case @variant.status when 'active' then '启用' when 'inactive' then '停用' end %></span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">描述:</span>
+    <%= @variant.description || '-' %>
+  </div>
+  <div class="info-row">
+    <span class="info-label">创建时间:</span>
+    <%= @variant.created_at.strftime('%Y-%m-%d %H:%M') %>
+  </div>
+</div>
 
-  <div class="card">
-    <h2>序列号列表</h2>
-    <% if @serial_numbers.empty? %>
-      <p>暂无序列号</p>
-    <% else %>
-      <table>
-        <tr>
-          <th>编码</th>
-          <th>证书号</th>
-          <th>状态</th>
-          <th>售出时间</th>
-          <th>操作</th>
-        </tr>
-        <% @serial_numbers.each do |sn| %>
-        <tr>
-          <td><%= link_to sn.code, serial_number_path(sn) %></td>
-          <td><%= sn.certificate_no || '-' %></td>
-          <td><span class="status-<%= sn.status %>"><%= case sn.status when 'in_stock' then '在库' when 'sold' then '已售出' when 'returned' then '已退货' when 'scrapped' then '已报废' end %></span></td>
-          <td><%= sn.sold_at&.strftime('%Y-%m-%d %H:%M') || '-' %></td>
-          <td>
-            <%= link_to '查看', serial_number_path(sn), class: 'btn btn-small' %>
-          </td>
-        </tr>
-        <% end %>
-      </table>
-    <% end %>
+<div class="card">
+  <div class="card-header fw-bold">批次列表</div>
+  <div class="d-flex gap-2 mb-3" style="margin-bottom: 15px;">
+    <%= link_to '新建批次', new_variant_batch_path(@variant), class: 'btn btn-outline-secondary' %>
   </div>
-</body>
-</html>
+  <% if @variant.batches.empty? %>
+    <p>暂无批次</p>
+  <% else %>
+    <table class="table table-hover align-middle">
+      <tr>
+        <th>批次号</th>
+        <th>数量</th>
+        <th>生产日期</th>
+        <th>供应商</th>
+        <th>状态</th>
+        <th>序列号数</th>
+        <th>操作</th>
+      </tr>
+      <% @variant.batches.each do |batch| %>
+      <tr>
+        <td><%= link_to batch.number, variant_batch_path(@variant, batch) %></td>
+        <td><%= batch.quantity %></td>
+        <td><%= batch.production_date&.strftime('%Y-%m-%d') || '-' %></td>
+        <td><%= batch.supplier || '-' %></td>
+        <td><span class="status-<%= batch.status %>"><%= case batch.status when 'in_production' then '生产中' when 'in_stock' then '已入库' when 'sold_out' then '已售罄' when 'scrapped' then '已报废' end %></span></td>
+        <td><%= batch.serial_numbers.count %></td>
+        <td>
+          <%= link_to '查看', variant_batch_path(@variant, batch), class: 'btn btn-sm' %>
+        </td>
+      </tr>
+      <% end %>
+    </table>
+  <% end %>
+</div>
+
+<div class="card">
+  <div class="card-header fw-bold">序列号列表</div>
+  <% if @serial_numbers.empty? %>
+    <p>暂无序列号</p>
+  <% else %>
+    <table class="table table-hover align-middle">
+      <tr>
+        <th>编码</th>
+        <th>证书号</th>
+        <th>状态</th>
+        <th>售出时间</th>
+        <th>操作</th>
+      </tr>
+      <% @serial_numbers.each do |sn| %>
+      <tr>
+        <td><%= link_to sn.code, serial_number_path(sn) %></td>
+        <td><%= sn.certificate_no || '-' %></td>
+        <td><span class="status-<%= sn.status %>"><%= case sn.status when 'in_stock' then '在库' when 'sold' then '已售出' when 'returned' then '已退货' when 'scrapped' then '已报废' end %></span></td>
+        <td><%= sn.sold_at&.strftime('%Y-%m-%d %H:%M') || '-' %></td>
+        <td>
+          <%= link_to '查看', serial_number_path(sn), class: 'btn btn-sm' %>
+        </td>
+      </tr>
+      <% end %>
+    </table>
+  <% end %>
+</div>

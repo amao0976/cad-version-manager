@@ -1,0 +1,93 @@
+<% content_for :title, '文档管理' %>
+
+<div class="page-header mb-4">
+  <h1>文档管理</h1>
+  <div class="d-flex gap-2 mt-2">
+    <%= link_to '新建文档', new_guide_path, class: 'btn btn-primary' %>
+    <%= link_to '分类管理', guide_categories_path, class: 'btn btn-outline-secondary' %>
+    <%= link_to '返回帮助中心', guides_path, class: 'btn btn-outline-secondary' %>
+  </div>
+</div>
+
+<!-- 筛选 -->
+<div class="card mb-3">
+  <div class="card-body">
+    <form action="<%= admin_guides_path %>" method="get" class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label small">关键词</label>
+        <input type="text" name="keyword" value="<%= params[:keyword] %>" class="form-control form-control-sm" placeholder="搜索标题或内容...">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small">状态</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">全部</option>
+          <option value="draft" <%= 'selected' if params[:status] == 'draft' %>>草稿</option>
+          <option value="published" <%= 'selected' if params[:status] == 'published' %>>已发布</option>
+          <option value="archived" <%= 'selected' if params[:status] == 'archived' %>>已归档</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-primary">筛选</button>
+        <a href="<%= admin_guides_path %>" class="btn btn-sm btn-outline-secondary">重置</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 文档列表 -->
+<div class="card">
+  <div class="card-body table-responsive-wrap">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>标题</th>
+          <th>分类</th>
+          <th>状态</th>
+          <th>作者</th>
+          <th>更新时间</th>
+          <th>阅读</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @guides.each do |guide| %>
+          <tr>
+            <td>
+              <%= link_to guide.title, guide_path(guide.slug) %>
+            </td>
+            <td><%= guide.guide_category&.name || '-' %></td>
+            <td>
+              <% case guide.status %>
+              <% when 'draft' %>
+                <span class="badge bg-secondary">草稿</span>
+              <% when 'published' %>
+                <span class="badge bg-success">已发布</span>
+              <% when 'archived' %>
+                <span class="badge bg-warning">已归档</span>
+              <% end %>
+            </td>
+            <td><%= guide.author&.name || '-' %></td>
+            <td><%= l(guide.updated_at, format: :short) %></td>
+            <td><%= guide.views_count %></td>
+            <td>
+              <%= link_to '查看', guide_path(guide.slug), class: 'btn btn-sm btn-outline-primary' %>
+              <%= link_to '编辑', edit_guide_path(guide.slug), class: 'btn btn-sm btn-outline-secondary' %>
+              <% if guide.draft? %>
+                <%= button_to '发布', publish_guide_path(guide.slug), method: :patch, class: 'btn btn-sm btn-success' %>
+              <% elsif guide.published? %>
+                <%= button_to '归档', archive_guide_path(guide.slug), method: :patch, class: 'btn btn-sm btn-warning' %>
+              <% end %>
+              <%= button_to '删除', guide_path(guide.slug), method: :delete, data: { confirm: '确定删除吗？' }, class: 'btn btn-sm btn-outline-danger' %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @guides.respond_to?(:next_page) %>
+      <%= pagy_nav(@pagy) %>
+    <% end %>
+    <% if @guides.empty? %>
+      <p class="text-muted text-center">暂无文档</p>
+    <% end %>
+  </div>
+</div>

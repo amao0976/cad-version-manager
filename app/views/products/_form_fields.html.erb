@@ -1,0 +1,193 @@
+<% f ||= local_assigns[:f] %>
+<% submit_label ||= local_assigns[:submit_label] || '保存' %>
+
+<div class="card-body">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :product_code, '产品编码', class: 'form-label'%>
+        <%= f.text_field :product_code, class: 'form-control', required: true %>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :name, '名称', class: 'form-label'%>
+        <%= f.text_field :name, class: 'form-control', required: true %>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :category_id, '分类', class: 'form-label'%>
+        <%= f.collection_select :category_id, @categories, :id, :name, { include_blank: '请选择分类' }, class: 'form-select', required: true %>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :theme, '产品主题', class: 'form-label'%>
+        <%= f.select :theme, Product.themes.map { |label, value| [label, value] }, { include_blank: '请选择主题' }, class: 'form-select' %>
+        <div class="form-text">产品整体主题，如金色主题、银色主题等</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :movement_category_id, '机芯类型', class: 'form-label'%>
+        <%= f.collection_select :movement_category_id, @movement_categories, :id, :name, { include_blank: '请选择机芯类型' }, class: 'form-select' %>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :strap_category_id, '表带类型', class: 'form-label'%>
+        <%= f.collection_select :strap_category_id, @strap_categories, :id, :name, { include_blank: '请选择表带类型' }, class: 'form-select' %>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :target_group_category_id, '目标人群', class: 'form-label'%>
+        <%= f.collection_select :target_group_category_id, @target_group_categories, :id, :name, { include_blank: '请选择目标人群' }, class: 'form-select' %>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :base_weight, '基础克重(g)', class: 'form-label'%>
+        <%= f.text_field :base_weight, class: 'form-control', type: 'number', step: '0.01' %>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :design_drawing_id, '设计图', class: 'form-label'%>
+        <%= f.collection_select :design_drawing_id, @design_drawings, :id, :name, { include_blank: '不关联设计图' }, class: 'form-select' %>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :status, '状态', class: 'form-label'%>
+        <%= f.select :status, [['草稿', 'draft'], ['已发布', 'published'], ['已下架', 'offline']], {}, class: 'form-select' %>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="mb-3">
+        <%= f.label :description, '描述', class: 'form-label'%>
+        <%= f.text_area :description, class: 'form-control', rows: 3 %>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="mb-0">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label class="form-label fw-bold mb-0"><i class="bi bi-images"></i> 产品图片</label>
+          <button type="button" class="btn btn-sm btn-outline-primary" onclick="addProductImageField('#productImageRows')">
+            <i class="bi bi-plus-circle"></i> 增加图片
+          </button>
+        </div>
+
+        <div id="productImageRows" class="row g-3">
+          <%# 已有图片 %>
+          <% f.object.product_images.sorted.each do |pimg| %>
+            <div class="col-12 col-md-6 col-xl-4" data-image-upload-row>
+              <div class="card p-2 h-100">
+                <div class="d-flex gap-2">
+                  <div style="width: 96px; flex-shrink: 0;">
+                    <% if pimg.image.present? %>
+                      <a href="<%= pimg.image.url %>" class="product-thumb" style="width:96px;height:96px;" data-bs-toggle="lightbox" data-bs-title="<%= f.object.name %>">
+                        <img src="<%= pimg.image.url %>" class="img-thumbnail w-100 product-thumb-img" alt="" style="width: 96px; height: 96px; object-fit: cover;">
+                      </a>
+                    <% else %>
+                      <div class="d-none">
+                        <img data-preview class="img-thumbnail w-100" style="height: 96px; object-fit: cover;" alt="">
+                      </div>
+                    <% end %>
+                  </div>
+                  <div class="flex-grow-1 d-flex flex-column gap-2">
+                    <%= f.fields_for :product_images, pimg, child_index: pimg.id do |pf| %>
+                      <%= pf.hidden_field :id %>
+                      <div>
+                        <%= pf.file_field :image, class: 'form-control form-control-sm' %>
+                      </div>
+                      <div class="d-flex gap-2 align-items-center flex-wrap">
+                        <div class="form-check form-check-inline mb-0">
+                          <%= pf.check_box :is_cover, class: 'form-check-input' %>
+                          <%= pf.label :is_cover, '封面', class: 'form-check-label' %>
+                        </div>
+                        <div class="flex-grow-1"></div>
+                        <label class="form-check-label mb-0 text-danger small" style="cursor: pointer;">
+                          <%= pf.check_box :_destroy, class: 'form-check-input' %>
+                          删除
+                        </label>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <%# 新增一条空的上传框 %>
+          <div class="col-12 col-md-6 col-xl-4" data-image-upload-row>
+            <div class="card p-2 h-100">
+              <div class="d-flex gap-2">
+                <div style="width: 96px; flex-shrink: 0;">
+                  <div data-preview-wrap class="d-none">
+                    <img data-preview class="img-thumbnail w-100" style="height: 96px; object-fit: cover;" alt="">
+                  </div>
+                  <div data-preview-placeholder class="product-thumb placeholder-img bg-light d-flex align-items-center justify-content-center text-muted" style="width: 96px; height: 96px;">
+                    <i class="bi bi-image fs-3"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 d-flex flex-column gap-2">
+                  <%= f.fields_for :product_images, ProductImage.new, child_index: 'new_0' do |pf| %>
+                    <div>
+                      <%= pf.file_field :image, class: 'form-control form-control-sm', data: { preview_target: 'true' } %>
+                    </div>
+                    <div class="d-flex gap-2 align-items-center">
+                      <div class="form-check form-check-inline mb-0">
+                        <%= pf.check_box :is_cover, class: 'form-check-input' %>
+                        <%= pf.label :is_cover, '封面', class: 'form-check-label' %>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <%# 新行模板 %>
+        <template data-new-image-row>
+          <div class="col-12 col-md-6 col-xl-4" data-image-upload-row>
+            <div class="card p-2 h-100">
+              <div class="d-flex gap-2">
+                <div style="width: 96px; flex-shrink: 0;">
+                  <div data-preview-wrap class="d-none">
+                    <img data-preview class="img-thumbnail w-100" style="height: 96px; object-fit: cover;" alt="">
+                  </div>
+                  <div data-preview-placeholder class="product-thumb placeholder-img bg-light d-flex align-items-center justify-content-center text-muted" style="width: 96px; height: 96px;">
+                    <i class="bi bi-image fs-3"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 d-flex flex-column gap-2">
+                  <%= fields_for 'product[product_images_attributes][NEW_RECORD]', ProductImage.new do |pf| %>
+                    <div>
+                      <%= pf.file_field :image, class: 'form-control form-control-sm', data: { preview_target: 'true' } %>
+                    </div>
+                    <div class="d-flex gap-2 align-items-center">
+                      <div class="form-check form-check-inline mb-0">
+                        <%= pf.check_box :is_cover, class: 'form-check-input' %>
+                        <%= pf.label :is_cover, '封面', class: 'form-check-label' %>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <div class="form-text mt-2">
+          支持 JPG / PNG / GIF / WebP，建议尺寸不小于 1000px。可指定一张为封面，产品列表中会优先展示封面图。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card-footer bg-light d-flex justify-content-end">
+  <%= f.submit submit_label, class: 'btn btn-primary' %>
+</div>

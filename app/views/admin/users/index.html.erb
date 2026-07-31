@@ -1,0 +1,73 @@
+<% content_for :title, '用户管理' %>
+
+<div class="page-header">
+  <div>
+    <h1><i class="bi bi-people"></i> 用户管理</h1>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-outline-secondary' %>
+    <%= link_to '新建用户', new_admin_user_path, class: 'btn btn-primary' %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>邮箱</th>
+            <th>姓名</th>
+            <th>角色</th>
+            <th>登录次数</th>
+            <th>最后登录时间</th>
+            <th>最后登录 IP</th>
+            <th>注册时间</th>
+            <th class="text-end">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @users.each do |user| %>
+            <tr>
+              <td><%= user.email %></td>
+              <td><%= user.name %></td>
+              <td>
+                <%
+                  role_labels = {
+                    'admin' => ['管理员', 'bg-danger'],
+                    'manager' => ['经理', 'bg-warning'],
+                    'engineer' => ['工程师', 'bg-info'],
+                    'viewer' => ['访客', 'bg-secondary']
+                  }
+                  label, badge_class = role_labels[user.role] || [user.role, 'bg-secondary']
+                %>
+                <span class="badge <%= badge_class %>"><%= label %></span>
+              </td>
+              <td><%= user.sign_in_count %></td>
+              <td>
+                <% if user.last_sign_in_at %>
+                  <%= l user.last_sign_in_at, format: :long rescue user.last_sign_in_at.strftime('%Y-%m-%d %H:%M') %>
+                <% else %>
+                  <span class="text-muted">从未登录</span>
+                <% end %>
+              </td>
+              <td><%= user.last_sign_in_ip || '-' %></td>
+              <td><%= user.created_at.strftime('%Y-%m-%d') %></td>
+              <td class="text-end" style="min-width: 180px;">
+                <div class="d-flex gap-1 justify-content-end">
+                  <%= link_to '查看', admin_user_path(user), class: 'btn btn-sm btn-outline-primary flex-shrink-0' %>
+                  <%= link_to '编辑', edit_admin_user_path(user), class: 'btn btn-sm btn-outline-secondary flex-shrink-0' %>
+                  <% if user == current_user %>
+                    <span class="btn btn-sm btn-outline-danger disabled flex-shrink-0" title="不能删除自己">删除</span>
+                  <% else %>
+                    <%= button_to '删除', admin_user_path(user), method: :delete, form: { class: 'd-inline-flex' }, data: { turbo_confirm: "确定要删除用户 #{user.email} 吗？" }, class: 'btn btn-sm btn-outline-danger flex-shrink-0' %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

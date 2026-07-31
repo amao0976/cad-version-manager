@@ -1,0 +1,75 @@
+<% content_for :title, '帮助中心 - 产品说明与文档' %>
+
+<div class="page-header mb-4">
+  <h1>帮助中心</h1>
+  <p class="text-muted">产品说明、使用指南和常见问题解答</p>
+</div>
+
+<!-- 搜索和筛选 -->
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-6">
+        <form action="<%= guides_path %>" method="get" class="d-flex gap-2">
+          <input type="text" name="keyword" value="<%= params[:keyword] %>" class="form-control" placeholder="搜索文档...">
+          <button type="submit" class="btn btn-primary">搜索</button>
+        </form>
+      </div>
+      <div class="col-md-6">
+        <div class="d-flex gap-2 flex-wrap">
+          <strong>分类：</strong>
+          <a href="<%= guides_path %>" class="btn btn-sm <%= params[:category].blank? ? 'btn-primary' : 'btn-outline-secondary' %>">全部</a>
+          <% @categories.each do |cat| %>
+            <a href="<%= guides_path(category: cat.slug) %>" class="btn btn-sm <%= params[:category] == cat.slug ? 'btn-primary' : 'btn-outline-secondary' %>">
+              <%= cat.name %>
+            </a>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 文档列表 -->
+<div class="row g-4">
+  <% @guides.each do |guide| %>
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 guide-card">
+        <div class="card-body">
+          <% if guide.guide_category %>
+            <span class="badge bg-primary mb-2"><%= guide.guide_category.name %></span>
+          <% end %>
+          <h5 class="card-title">
+            <%= link_to guide.title, guide_path(guide.slug) %>
+          </h5>
+          <p class="card-text text-muted small">
+            <%= truncate(guide.content_md, length: 120) %>
+          </p>
+          <div class="d-flex justify-content-between align-items-center text-muted small">
+            <span>
+              <% if guide.published_at %>
+                <%= l(guide.published_at, format: :short) %>
+              <% end %>
+            </span>
+            <span>👁 <%= guide.views_count %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if @guides.respond_to?(:next_page) %>
+  <div class="mt-4 text-center">
+    <%= pagy_nav(@pagy) %>
+  </div>
+<% end %>
+
+<% if @guides.empty? %>
+  <div class="text-center py-5">
+    <p class="text-muted">暂无文档</p>
+    <% if user_signed_in? && (current_user.admin? || current_user.editor?) %>
+      <%= link_to '创建第一篇文档', new_guide_path, class: 'btn btn-primary' %>
+    <% end %>
+  </div>
+<% end %>

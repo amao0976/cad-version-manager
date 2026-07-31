@@ -4,7 +4,7 @@ class BomsController < ApplicationController
   def index
     @categories = Category.where(parent_id: nil).order(:sort_order)
     @products = Product.all
-    @boms = ProductBom.includes(:design_project, :design_drawing, :bom_items).includes(product: :category).order(created_at: :desc)
+    @boms = ProductBom.includes(:design_project, :design_drawing, :bom_items, product: :category).order(created_at: :desc)
     @boms = @boms.where(product_id: params[:product_id]) if params[:product_id].present?
     @boms = @boms.where(status: params[:status]) if params[:status].present?
     if params[:category_id].present?
@@ -18,7 +18,7 @@ class BomsController < ApplicationController
   end
 
   def show
-    @bom = ProductBom.includes(bom_items: [:design_drawing, :sub_items]).find(params[:id])
+    @bom = ProductBom.includes(bom_items: [:design_drawing, :sub_items, :color]).find(params[:id])
   end
 
   def new
@@ -68,13 +68,13 @@ class BomsController < ApplicationController
   end
 
   def approve
-    @bom = ProductBom.find(params[:id])
+    @bom = ProductBom.find(params[:bom_id])
     @bom.approve
     redirect_to boms_path, notice: 'BOM已审批'
   end
 
   def release
-    @bom = ProductBom.find(params[:id])
+    @bom = ProductBom.find(params[:bom_id])
     @bom.release
     redirect_to boms_path, notice: 'BOM已发布'
   end
@@ -83,6 +83,7 @@ class BomsController < ApplicationController
     @bom = ProductBom.find(params[:bom_id])
     @item = BomItem.new(product_bom_id: @bom.id)
     @drawings = DesignDrawing.all
+    @colors = Color.active.order(:color_type, :name)
   end
 
   def create_item
@@ -93,6 +94,7 @@ class BomsController < ApplicationController
       redirect_to bom_path(@bom), notice: '物料项添加成功'
     else
       @drawings = DesignDrawing.all
+      @colors = Color.active.order(:color_type, :name)
       render :add_item
     end
   end
@@ -113,7 +115,7 @@ class BomsController < ApplicationController
   def item_params
     params.require(:bom_item).permit(
       :design_drawing_id, :part_number, :part_name, :material, :specification,
-      :quantity, :unit, :weight, :source, :level, :parent_id
+      :quantity, :unit, :weight, :source, :level, :parent_id, :color_id
     )
   end
 end

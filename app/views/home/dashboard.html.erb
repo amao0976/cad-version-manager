@@ -1,168 +1,191 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>系统仪表盘</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .header h1 { display: inline; margin-right: 20px; }
-    .header .user-info { float: right; }
-    .header .btn { padding: 8px 16px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px; }
-    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
-    .stats { display: flex; gap: 20px; }
-    .stat-box { flex: 1; text-align: center; padding: 20px; background: #e9ecef; border-radius: 8px; }
-    .stat-box .number { font-size: 32px; font-weight: bold; color: #007bff; }
-    .stat-box .label { color: #666; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background: #f8f9fa; }
-    a { color: #007bff; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>系统仪表盘</h1>
-    <div class="user-info">
-      <span>欢迎, <%= current_user.name || current_user.email %></span>
-      <%= link_to '退出登录', destroy_user_session_path, method: :delete, class: 'btn' %>
+<% content_for :title, '系统仪表盘' %>
+
+<div class="dashboard-welcome">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <h2><i class="bi bi-speedometer2"></i> 欢迎回来，<%= current_user.name || current_user.email %></h2>
+      <p class="mb-0">这是你的 CAD 设计图纸版本管理系统控制台</p>
     </div>
   </div>
+</div>
 
-  <div class="card">
-    <div class="stats">
-      <div class="stat-box">
-        <div class="number"><%= @projects.count %></div>
-        <div class="label">项目总数</div>
-      </div>
-      <div class="stat-box">
-        <div class="number"><%= @drawings.count %></div>
-        <div class="label">图纸总数</div>
-      </div>
-      <div class="stat-box">
-        <div class="number"><%= @versions.count %></div>
-        <div class="label">版本总数</div>
-      </div>
-      <div class="stat-box">
-        <div class="number"><%= @boms.count %></div>
-        <div class="label">BOM总数</div>
-      </div>
-      <div class="stat-box">
-        <div class="number"><%= @products.count %></div>
-        <div class="label">产品总数</div>
-      </div>
-      <div class="stat-box">
-        <div class="number"><%= @suppliers.count %></div>
-        <div class="label">供应商总数</div>
-      </div>
+<%= turbo_frame_tag :stats do %>
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card" style="--stat-from:#3b82f6;--stat-to:#1d4ed8;">
+      <div class="stat-icon"><i class="bi bi-collection"></i></div>
+      <div class="stat-number"><%= @projects.count %></div>
+      <div class="stat-label">项目总数</div>
     </div>
   </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card" style="--stat-from:#10b981;--stat-to:#059669;">
+      <div class="stat-icon"><i class="bi bi-file-earmark-blueprint"></i></div>
+      <div class="stat-number"><%= @drawings.count %></div>
+      <div class="stat-label">图纸总数</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card" style="--stat-from:#f59e0b;--stat-to:#d97706;">
+      <div class="stat-icon"><i class="bi bi-layers"></i></div>
+      <div class="stat-number"><%= @versions.count %></div>
+      <div class="stat-label">版本总数</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card" style="--stat-from:#8b5cf6;--stat-to:#6d28d9;">
+      <div class="stat-icon"><i class="bi bi-box-seam"></i></div>
+      <div class="stat-number"><%= @boms.count %></div>
+      <div class="stat-label">BOM总数</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card" style="--stat-from:#06b6d4;--stat-to:#0891b2;">
+      <div class="stat-icon"><i class="bi bi-watch"></i></div>
+      <div class="stat-number"><%= @products.count %></div>
+      <div class="stat-label">产品总数</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card" style="--stat-from:#ec4899;--stat-to:#db2777;">
+      <div class="stat-icon"><i class="bi bi-building"></i></div>
+      <div class="stat-number"><%= @suppliers.count %></div>
+      <div class="stat-label">供应商总数</div>
+    </div>
+  </div>
+</div>
+<% end %>
 
-  <div class="card">
-    <h2><%= link_to '产品分类', categories_path %></h2>
-    <table>
-      <tr>
-        <th>分类名称</th>
-        <th>编码</th>
-        <th>子分类数</th>
-        <th>产品数</th>
-      </tr>
-      <% @categories.each do |cat| %>
-      <tr>
-        <td><%= link_to cat.name, category_path(cat) %></td>
-        <td><%= cat.code %></td>
-        <td><%= cat.children.count %></td>
-        <td><%= cat.products.count %></td>
-      </tr>
-      <% end %>
-    </table>
+<div class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <%= turbo_frame_tag :categories do %>
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-tags"></i> 产品分类</span>
+        <%= link_to '管理', categories_path, class: 'btn btn-sm btn-outline-primary' %>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>名称</th><th>编码</th><th>子分类</th><th>产品数</th></tr></thead>
+          <tbody>
+            <% @categories.each do |cat| %>
+            <tr>
+              <td><%= link_to cat.name, category_path(cat) %></td>
+              <td><%= cat.code %></td>
+              <td><span class="badge bg-secondary"><%= cat.children.count %></span></td>
+              <td><span class="badge bg-primary"><%= cat.products.count %></span></td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% end %>
   </div>
 
-  <div class="card">
-    <h2><%= link_to '供应商管理', suppliers_path %></h2>
-    <table>
-      <tr>
-        <th>编码</th>
-        <th>名称</th>
-        <th>类型</th>
-        <th>联系人</th>
-        <th>电话</th>
-        <th>等级</th>
-        <th>状态</th>
-      </tr>
-      <% @suppliers.limit(10).each do |s| %>
-      <tr>
-        <td><%= s.code %></td>
-        <td><%= link_to s.name, supplier_path(s) %></td>
-        <td><%= s.display_type %></td>
-        <td><%= s.contact_person || '-' %></td>
-        <td><%= s.phone || '-' %></td>
-        <td><%= s.display_level %></td>
-        <td><%= s.display_status %></td>
-      </tr>
-      <% end %>
-    </table>
+  <div class="col-lg-6">
+    <%= turbo_frame_tag :suppliers do %>
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-building"></i> 供应商</span>
+        <%= link_to '管理', suppliers_path, class: 'btn btn-sm btn-outline-primary' %>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>名称</th><th>类型</th><th>联系人</th><th>状态</th></tr></thead>
+          <tbody>
+            <% @suppliers.limit(5).each do |s| %>
+            <tr>
+              <td><%= link_to s.name, supplier_path(s) %></td>
+              <td><span class="badge bg-info text-dark"><%= s.display_type %></span></td>
+              <td><%= s.contact_person || '-' %></td>
+              <td><%= s.display_status %></td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <%= turbo_frame_tag :boms do %>
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-box-seam"></i> BOM 列表</span>
+        <%= link_to '查看全部', boms_path, class: 'btn btn-sm btn-outline-primary' %>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>名称</th><th>项目</th><th>状态</th></tr></thead>
+          <tbody>
+            <% @boms.each do |bom| %>
+            <tr>
+              <td><%= link_to bom.name, bom_path(bom) %></td>
+              <td><%= bom.design_project&.name %></td>
+              <td><%= bom.status %></td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% end %>
   </div>
 
-  <div class="card">
-    <h2><%= link_to 'BOM管理', boms_path %></h2>
-    <table>
-      <tr>
-        <th>名称</th>
-        <th>项目</th>
-        <th>图纸</th>
-        <th>状态</th>
-      </tr>
-      <% @boms.each do |bom| %>
-      <tr>
-        <td><%= link_to bom.name, bom_path(bom) %></td>
-        <td><%= bom.design_project&.name %></td>
-        <td><%= bom.design_drawing&.name || '-' %></td>
-        <td><%= bom.status %></td>
-      </tr>
-      <% end %>
-    </table>
+  <div class="col-lg-6">
+    <%= turbo_frame_tag :projects do %>
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-folder2-open"></i> 项目列表</span>
+        <%= link_to '查看全部', design_projects_path, class: 'btn btn-sm btn-outline-primary' %>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>名称</th><th>状态</th><th>图纸数</th><th>创建</th></tr></thead>
+          <tbody>
+            <% @projects.each do |project| %>
+            <tr>
+              <td><%= project.name %></td>
+              <td><span class="badge bg-secondary"><%= project.status %></span></td>
+              <td><span class="badge bg-primary"><%= project.design_drawings.count %></span></td>
+              <td><%= project.created_at.strftime('%Y-%m-%d') %></td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% end %>
   </div>
+</div>
 
-  <div class="card">
-    <h2>项目列表</h2>
-    <table>
-      <tr>
-        <th>名称</th>
-        <th>状态</th>
-        <th>图纸数量</th>
-        <th>创建时间</th>
-      </tr>
-      <% @projects.each do |project| %>
-      <tr>
-        <td><%= project.name %></td>
-        <td><%= project.status %></td>
-        <td><%= project.design_drawings.count %></td>
-        <td><%= project.created_at.strftime('%Y-%m-%d') %></td>
-      </tr>
-      <% end %>
+<%= turbo_frame_tag :drawings do %>
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-file-earmark-blueprint"></i> 图纸管理</span>
+    <div class="d-flex gap-2">
+      <%= link_to 'PLM 管理', plm_dashboard_path, class: 'btn btn-sm btn-outline-info' %>
+      <%= link_to '查看全部', design_drawings_path, class: 'btn btn-sm btn-outline-primary' %>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>名称</th><th>项目</th><th>文件类型</th><th>版本数</th></tr></thead>
+      <tbody>
+        <% @drawings.each do |drawing| %>
+        <tr>
+          <td><%= link_to drawing.name, design_drawing_path(drawing) %></td>
+          <td><%= drawing.design_project.name %></td>
+          <td><span class="badge bg-light text-dark"><%= drawing.file_type %></span></td>
+          <td><span class="badge bg-primary"><%= drawing.drawing_versions.count %></span></td>
+        </tr>
+        <% end %>
+      </tbody>
     </table>
   </div>
-
-  <div class="card">
-    <h2><%= link_to '图纸管理', design_drawings_path %></h2>
-    <table>
-      <tr>
-        <th>名称</th>
-        <th>项目</th>
-        <th>文件类型</th>
-        <th>版本数</th>
-      </tr>
-      <% @drawings.each do |drawing| %>
-      <tr>
-        <td><%= link_to drawing.name, design_drawing_path(drawing) %></td>
-        <td><%= drawing.design_project.name %></td>
-        <td><%= drawing.file_type %></td>
-        <td><%= drawing.drawing_versions.count %></td>
-      </tr>
-      <% end %>
-    </table>
-  </div>
-</body>
-</html>
+</div>
+<% end %>

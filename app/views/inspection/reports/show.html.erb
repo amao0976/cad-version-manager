@@ -1,0 +1,76 @@
+<% content_for :title, '验货报告详情' %>
+
+<div class="page-header mb-4">
+  <h1>验货报告</h1>
+  <div class="d-flex gap-2 mt-2 flex-wrap">
+    <%= link_to '返回记录', inspection_record_path(@record), class: 'btn btn-outline-secondary' %>
+    <%= link_to '导出 Excel', export_excel_inspection_record_report_path(@record), class: 'btn btn-outline-success' %>
+    <%= link_to '导出 PDF', export_pdf_inspection_record_report_path(@record), class: 'btn btn-outline-danger' %>
+    <% if @report.status == 'draft' %>
+      <%= link_to '编辑', edit_inspection_record_report_path(@record), class: 'btn btn-primary' %>
+    <% end %>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body text-center">
+    <% if @report.status == 'completed' %>
+      <span class="badge bg-success fs-6">已完成</span>
+    <% else %>
+      <span class="badge bg-warning fs-6">草稿</span>
+    <% end %>
+  </div>
+</div>
+
+<%= render 'inspection_header', record: @record %>
+
+<div class="card mb-3">
+  <div class="card-header fw-bold">产品信息</div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <p><strong>款式描述：</strong><%= @report.style_description %></p>
+        <p><strong>颜色：</strong><%= @report.color %></p>
+      </div>
+      <div class="col-md-6">
+        <p><strong>材质成分：</strong><%= @report.material_composition %></p>
+        <p><strong>尺码范围：</strong><%= @report.size_range %></p>
+      </div>
+    </div>
+    <% if @report.product_remarks.present? %>
+      <p><strong>产品备注：</strong><%= simple_format(@report.product_remarks) %></p>
+    <% end %>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header fw-bold">产品图片</div>
+  <div class="card-body">
+    <%= render 'image_upload_section', title: '产品概览', section_id: 'product_overview', field_name: nil, report: @report, editable: false, existing_images: @report.product_overview_images %>
+    <%= render 'image_upload_section', title: '标签/吊牌', section_id: 'label_hangtag', field_name: nil, report: @report, editable: false, existing_images: @report.label_hangtag_images %>
+    <%= render 'image_upload_section', title: 'RFID', section_id: 'rfid', field_name: nil, report: @report, editable: false, existing_images: @report.rfid_images %>
+    <%= render 'image_upload_section', title: '缺陷详情', section_id: 'defect_details', field_name: nil, report: @report, editable: false, existing_images: @report.defect_detail_images %>
+  </div>
+</div>
+
+<%= render 'size_table_readonly', report: @report %>
+
+<% if @report.summary.present? %>
+  <div class="card mb-3">
+    <div class="card-header fw-bold">检验摘要</div>
+    <div class="card-body"><%= simple_format(@report.summary) %></div>
+  </div>
+<% end %>
+
+<div class="card">
+  <div class="card-header fw-bold">操作</div>
+  <div class="card-body">
+    <% if @report.can_complete? %>
+      <%= button_to '标记为已完成', complete_inspection_record_report_path(@record), method: :patch, class: 'btn btn-success' %>
+    <% end %>
+    <% if @report.can_reopen? %>
+      <%= button_to '重新打开', reopen_inspection_record_report_path(@record), method: :patch, class: 'btn btn-warning' %>
+    <% end %>
+    <%= link_to '返回记录', inspection_record_path(@record), class: 'btn btn-outline-secondary' %>
+  </div>
+</div>

@@ -1,0 +1,19 @@
+<tr class="item-row">
+  <td><%= item_form.text_field :order_number, class: 'form-control form-control-sm item-order-number', placeholder: '订单号', required: true %></td>
+  <td><%= item_form.text_field :style_number, class: 'form-control form-control-sm item-style-number', placeholder: '款号', required: true %></td>
+  <td><%= item_form.number_field :quantity, class: 'form-control form-control-sm item-quantity', min: 1, placeholder: '数量', required: true, oninput: 'calcAql(this)' %></td>
+  <td>
+    <%= item_form.select :aql_level, AqlCalculator::AQL_LEVELS.map { |l| [l, l] }, {}, class: 'form-select form-select-sm item-aql-level', onchange: 'calcAql(this)' %>
+  </td>
+  <td>
+    <%= item_form.select :inspection_level, AqlCalculator::INSPECTION_LEVELS.map { |l| [AqlCalculator::INSPECTION_LEVEL_LABELS[l], l] }, {}, class: 'form-select form-select-sm item-inspection-level', onchange: 'calcAql(this)' %>
+  </td>
+  <td class="item-code-letter" style="text-align: center; font-weight: 600;"><%= item_form.object.code_letter || "-" %></td>
+  <td class="item-sample-size" style="text-align: center; font-weight: 600;"><%= item_form.object.sample_size || "-" %></td>
+  <td class="item-accept-qty" style="text-align: center; color: #16a34a; font-weight: 600;"><%= item_form.object.accept_qty || "-" %></td>
+  <td class="item-reject-qty" style="text-align: center; color: #dc2626; font-weight: 600;"><%= item_form.object.reject_qty || "-" %></td>
+  <td>
+    <%= item_form.hidden_field :_destroy, class: 'destroy-field' %>
+    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-row" onclick="removeRow(this)" title="删除">&times;</button>
+  </td>
+</tr>

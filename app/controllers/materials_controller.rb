@@ -12,6 +12,7 @@ class MaterialsController < ApplicationController
 
   def new
     @material = Material.new
+    load_case_material_categories
   end
 
   def create
@@ -20,17 +21,20 @@ class MaterialsController < ApplicationController
     if @material.save
       redirect_to materials_path, notice: '材质创建成功'
     else
+      load_case_material_categories
       render :new
     end
   end
 
   def edit
+    load_case_material_categories
   end
 
   def update
     if @material.update(material_params)
       redirect_to materials_path, notice: '材质更新成功'
     else
+      load_case_material_categories
       render :edit
     end
   end
@@ -47,6 +51,12 @@ class MaterialsController < ApplicationController
   end
 
   def material_params
-    params.require(:material).permit(:name, :code, :kind, :unit, :density, :description)
+    params.require(:material).permit(:name, :code, :kind, :unit, :density, :description, :case_material_category_id)
+  end
+
+  def load_case_material_categories
+    # L2 表壳材质选项
+    material_parent = Category.find_by(code: 'MATERIAL')
+    @case_material_categories = material_parent ? material_parent.children.order(:sort_order) : []
   end
 end

@@ -1,0 +1,202 @@
+<% content_for :title, '验货申请详情' %>
+
+<div class="page-header mb-4">
+  <h1>验货申请: <%= @request.order_number %></h1>
+  <div class="d-flex gap-2 mt-2 flex-wrap">
+    <%= link_to '返回列表', inspection_requests_path, class: 'btn btn-outline-secondary' %>
+    <% if @request.may_update? %>
+      <%= link_to '编辑', edit_inspection_request_path(@request), class: 'btn btn-outline-primary' %>
+    <% end %>
+    <% if @request.may_schedule? %>
+      <%= button_to '排期', schedule_inspection_request_path(@request), method: :patch, class: 'btn btn-warning' %>
+    <% end %>
+    <% if @request.may_complete? %>
+      <%= button_to '完成', complete_inspection_request_path(@request), method: :patch, class: 'btn btn-success' %>
+    <% end %>
+    <% if @request.may_cancel? %>
+      <%= button_to '取消', cancel_inspection_request_path(@request), method: :patch, class: 'btn btn-danger' %>
+    <% end %>
+    <% if @request.can_create_inspection? %>
+      <%= link_to '创建验货记录', new_inspection_inspection_request_path(@request), class: 'btn btn-primary' %>
+    <% end %>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body text-center">
+    <span class="badge fs-6" style="background-color: <%= @request.status_color %>; color: white"><%= @request.status_label %></span>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header fw-bold">基本信息</div>
+      <div class="card-body">
+        <p><strong>申请单号：</strong><%= @request.order_number %></p>
+        <p><strong>款号：</strong><%= @request.style_number %></p>
+        <p><strong>订单数量：</strong><%= @request.quantity %></p>
+        <p><strong>检验类型：</strong><%= @request.inspection_type %></p>
+        <p><strong>申请日期：</strong><%= l(@request.requested_date, format: :long) %></p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header fw-bold">供应商/工厂</div>
+      <div class="card-body">
+        <p><strong>供应商：</strong>
+          <% if @request.supplier %>
+            <%= link_to @request.supplier.name, supplier_path(@request.supplier) %>
+          <% else %>
+            <%= @request.supplier_name %>
+          <% end %>
+        </p>
+        <p><strong>工厂：</strong><%= @request.factory_name || '-' %></p>
+        <p><strong>产品：</strong><%= @request.product&.name || '-' %></p>
+        <p><strong>创建者：</strong><%= @request.created_by&.name || '-' %></p>
+        <p><strong>明细项数：</strong><%= @request.item_count %></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if @items.any? %>
+<div class="card mb-4">
+  <div class="card-header fw-bold">验货明细项</div>
+  <div class="card-body table-responsive-wrap">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>订单号</th>
+          <th>款号</th>
+          <th>数量</th>
+          <th>检验等级</th>
+          <th>AQL水平</th>
+          <th>代码字母</th>
+          <th>抽样数</th>
+          <th>接受数</th>
+          <th>拒收数</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @items.each do |item| %>
+          <tr>
+            <td><%= item.order_number %></td>
+            <td><%= item.style_number %></td>
+            <td><%= item.quantity %></td>
+            <td><%= item.inspection_level_label %></td>
+            <td><%= item.aql_level %></td>
+            <td style="font-weight:600;"><%= item.code_letter || '-' %></td>
+            <td><%= item.sample_size || '-' %></td>
+            <td style="color: #16a34a; font-weight:600;"><%= item.accept_qty || '-' %></td>
+            <td style="color: #dc2626; font-weight:600;"><%= item.reject_qty || '-' %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% end %>
+
+<% if @request.remarks.present? %>
+<div class="card mb-4">
+  <div class="card-header fw-bold">备注</div>
+  <div class="card-body"><%= simple_format(@request.remarks) %></div>
+</div>
+<% end %>
+
+<% if @request.status == 'pending' %>
+  <div class="card mb-4">
+    <div class="card-header fw-bold bg-light">审核验货申请</div>
+    <div class="card-body">
+      <%= form_with model: @request, url: review_inspection_request_path(@request), method: :patch, local: true, multipart: true do |f| %>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= f.label :result, '审核结果', class: 'form-label' %>
+              <%= f.select :result, [['PASS', 'PASS'], ['FAIL', 'FAIL'], ['CONDITIONAL', 'CONDITIONAL']], { include_blank: '请选择' }, class: 'form-select' %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <%= f.label :ps_comments, '生产/采购部意见', class: 'form-label' %>
+              <%= f.text_area :ps_comments, class: 'form-control', rows: 3 %>
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">审批截图</label>
+          <%= file_field_tag 'inspection_request[approval_screenshots][]', multiple: true, class: 'form-control' %>
+          <small class="text-muted">支持多图上传</small>
+        </div>
+        <% if @request.approval_screenshots.attached? %>
+          <div class="mb-3">
+            <strong>已有截图：</strong>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              <% @request.approval_screenshots.each do |screenshot| %>
+                <div class="d-inline-block">
+                  <%= image_tag screenshot, class: 'img-thumbnail', style: 'max-height: 80px' %>
+                  <%= button_to '删除', remove_screenshot_inspection_request_path(@request, attachment_id: screenshot.id), method: :delete, class: 'btn btn-sm btn-outline-danger mt-1' %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+        <button type="submit" class="btn btn-primary">提交审核</button>
+      <% end %>
+    </div>
+  </div>
+<% elsif @request.result.present? %>
+  <div class="card mb-4">
+    <div class="card-header fw-bold">审核结果</div>
+    <div class="card-body">
+      <p><strong>审核结果：</strong>
+        <% if @request.result == 'PASS' %>
+          <span class="badge bg-success fs-6">PASS</span>
+        <% elsif @request.result == 'FAIL' %>
+          <span class="badge bg-danger fs-6">FAIL</span>
+        <% else %>
+          <span class="badge bg-warning"><%= @request.result %></span>
+        <% end %>
+      </p>
+      <% if @request.approval_screenshots.attached? %>
+        <p><strong>审批凭证：</strong></p>
+        <div class="d-flex flex-wrap gap-2">
+          <% @request.approval_screenshots.each do |screenshot| %>
+            <%= image_tag screenshot, class: 'img-thumbnail', style: 'max-height: 100px' %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<% if @request.inspection_record.present? %>
+  <div class="card mb-4">
+    <div class="card-header fw-bold">关联验货记录</div>
+    <div class="card-body">
+      <p><strong>验货记录：</strong>
+        <%= link_to "查看验货记录 ##{@request.inspection_record.id}", inspection_record_path(@request.inspection_record), class: 'btn btn-outline-primary btn-sm' %>
+      </p>
+      <p><strong>验货日期：</strong><%= @request.inspection_record.inspection_date %></p>
+      <p><strong>检验结果：</strong>
+        <% rec = @request.inspection_record %>
+        <% if rec.result == 'pass' %>
+          <span class="badge bg-success">合格</span>
+        <% elsif rec.result == 'fail' %>
+          <span class="badge bg-danger">不合格</span>
+        <% else %>
+          <span class="badge bg-secondary"><%= rec.result_label %></span>
+        <% end %>
+      </p>
+    </div>
+  </div>
+<% end %>
+
+<div class="card">
+  <div class="card-header fw-bold">其他信息</div>
+  <div class="card-body">
+    <p><strong>提交时间：</strong><%= @request.created_at&.strftime("%Y-%m-%d %H:%M") %></p>
+  </div>
+</div>

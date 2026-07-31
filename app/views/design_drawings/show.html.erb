@@ -1,110 +1,151 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title><%= @drawing.name %></title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .header h1 { display: inline; margin-right: 20px; }
-    .header .actions { float: right; }
-    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
-    .header .btn:hover { background: #0056b3; }
-    .header .btn-danger { background: #dc3545; }
-    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
-    .info-row { margin-bottom: 10px; }
-    .info-label { display: inline-block; width: 120px; font-weight: bold; color: #666; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background: #f8f9fa; }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
-    .badge-latest { background: #d4edda; color: #155724; }
-    .badge-approved { background: #cce5ff; color: #004085; }
-    .badge-pending { background: #fff3cd; color: #856404; }
-    .btn-small { padding: 4px 10px; font-size: 12px; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1><%= @drawing.name %> - 图纸详情</h1>
-    <div class="actions">
-      <%= link_to '返回列表', design_drawings_path, class: 'btn btn-danger' %>
-      <%= link_to '上传新版本', design_drawing_upload_version_path(@drawing), class: 'btn' %>
-      <%= link_to '编辑', edit_design_drawing_path(@drawing), class: 'btn' %>
+<% content_for :title, @drawing.name %>
+
+<div class="page-header">
+  <div>
+    <h1><i class="bi bi-file-earmark-blueprint"></i> <%= @drawing.name %></h1>
+    <div class="text-muted mt-1">
+      <code><%= @drawing.display_drawing_code %></code>
+      <span class="mx-2">·</span>
+      <span>项目: <%= @drawing.design_project&.name %></span>
     </div>
   </div>
+  <div class="d-flex gap-2">
+    <%= link_to '返回列表', design_drawings_path, class: 'btn btn-outline-secondary' %>
+    <%= link_to '上传新版本', design_drawing_upload_version_path(@drawing), class: 'btn btn-primary' %>
+    <%= link_to '编辑', edit_design_drawing_path(@drawing), class: 'btn btn-outline-warning' %>
+  </div>
+</div>
 
-  <div class="card">
-    <h2>基本信息</h2>
-    <div class="info-row">
-      <span class="info-label">项目:</span>
-      <%= @drawing.design_project&.name %>
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="stat-card" style="--stat-from: #64748b; --stat-to: #475569;">
+      <div class="stat-number"><%= @versions.count %></div>
+      <div class="stat-label">版本总数</div>
+      <i class="bi bi-stack stat-icon"></i>
     </div>
-    <div class="info-row">
-      <span class="info-label">类型:</span>
-      <span class="badge badge-<%= @drawing.file_type %>"><%= @drawing.file_type.upcase %></span>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card" style="--stat-from: #10b981; --stat-to: #059669;">
+      <div class="stat-number"><%= @latest_formal ? "V#{@latest_formal.version_label}" : '-' %></div>
+      <div class="stat-label">最新正式版本</div>
+      <i class="bi bi-patch-check stat-icon"></i>
     </div>
-    <div class="info-row">
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card" style="--stat-from: #f59e0b; --stat-to: #d97706;">
+      <div class="stat-number"><%= @latest_draft ? @latest_draft.version_label : '-' %></div>
+      <div class="stat-label">最新草稿版本</div>
+      <i class="bi bi-pencil-square stat-icon"></i>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header"><i class="bi bi-info-circle"></i> 基本信息</div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="info-row">
+          <span class="info-label">图纸编号:</span>
+          <span class="info-value"><code><%= @drawing.display_drawing_code %></code></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">项目:</span>
+          <span class="info-value"><%= @drawing.design_project&.name || '-' %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">类型:</span>
+          <span class="info-value"><span class="badge bg-info text-dark"><%= @drawing.file_type.upcase %></span></span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="info-row">
+          <span class="info-label">创建人:</span>
+          <span class="info-value"><%= @drawing.created_by&.name || '-' %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">创建时间:</span>
+          <span class="info-value"><%= @drawing.created_at.strftime('%Y-%m-%d %H:%M') %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">存储路径:</span>
+          <span class="info-value"><%= @latest_version ? @latest_version.folder_path : '-' %></span>
+        </div>
+      </div>
+    </div>
+    <div class="info-row mt-2">
       <span class="info-label">描述:</span>
-      <%= @drawing.description || '-' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">创建人:</span>
-      <%= @drawing.created_by&.name || '-' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">创建时间:</span>
-      <%= @drawing.created_at.strftime('%Y-%m-%d %H:%M') %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">文件夹路径:</span>
-      <%= @latest_version ? @latest_version.folder_path : '-' %>
+      <span class="info-value"><%= @drawing.description || '-' %></span>
     </div>
   </div>
+</div>
 
-  <div class="card">
-    <h2>版本列表</h2>
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-clock-history"></i> 版本历史</span>
+    <%= link_to '上传新版本', design_drawing_upload_version_path(@drawing), class: 'btn btn-sm btn-primary' %>
+  </div>
+  <div class="card-body p-0">
     <% if @versions.empty? %>
-      <p>暂无版本，请上传图纸文件</p>
+      <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <div>暂无版本，请上传图纸文件</div>
+      </div>
     <% else %>
-      <table>
-        <tr>
-          <th>版本号</th>
-          <th>文件名</th>
-          <th>上传人</th>
-          <th>上传时间</th>
-          <th>变更日志</th>
-          <th>状态</th>
-          <th>操作</th>
-        </tr>
-        <% @versions.each do |version| %>
-        <tr>
-          <td>
-            v<%= version.version_number %>
-            <% if version.is_latest? %>
-              <span class="badge badge-latest">最新</span>
-            <% end %>
-          </td>
-          <td><%= version.file_name || '-' %></td>
-          <td><%= version.uploaded_by&.name || '-' %></td>
-          <td><%= version.created_at.strftime('%Y-%m-%d %H:%M') %></td>
-          <td><%= version.change_log || '-' %></td>
-          <td>
-            <% if version.is_approved? %>
-              <span class="badge badge-approved">已审批</span>
-            <% else %>
-              <span class="badge badge-pending">待审批</span>
-            <% end %>
-          </td>
-          <td>
-            <% if version.file.attached? %>
-              <%= link_to '下载', design_drawing_download_version_path(@drawing, version_id: version.id), class: 'btn btn-small' %>
-            <% end %>
-          </td>
-        </tr>
-        <% end %>
+      <table class="table table-hover mb-0 align-middle">
+        <thead>
+          <tr>
+            <th>版本</th>
+            <th>类型</th>
+            <th>文件名</th>
+            <th>上传人</th>
+            <th>上传时间</th>
+            <th>变更日志</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @versions.each do |version| %>
+          <tr>
+            <td>
+              <strong><%= version.display_label %></strong>
+              <% if version.is_latest? %>
+                <span class="badge bg-primary ms-1">最新</span>
+              <% end %>
+            </td>
+            <td>
+              <% if version.is_formal? %>
+                <span class="badge badge-released">正式</span>
+              <% else %>
+                <span class="badge badge-draft">草稿</span>
+              <% end %>
+            </td>
+            <td><%= version.file_name || '-' %></td>
+            <td><%= version.uploaded_by&.name || '-' %></td>
+            <td><%= version.created_at.strftime('%Y-%m-%d %H:%M') %></td>
+            <td><%= version.change_log || '-' %></td>
+            <td>
+              <% if version.is_approved? %>
+                <span class="badge badge-approved">已审批</span>
+              <% else %>
+                <span class="badge bg-secondary">待审批</span>
+              <% end %>
+            </td>
+            <td>
+              <div class="d-flex gap-1 flex-wrap">
+                <% if version.file.attached? %>
+                  <%= link_to '下载', design_drawing_download_version_path(@drawing, version_id: version.id), class: 'btn btn-sm btn-outline-primary' %>
+                <% end %>
+                <% if version.is_draft? %>
+                  <%= link_to '升级为正式版本', design_drawing_promote_version_path(@drawing, version_id: version.id), method: :post, class: 'btn btn-sm btn-outline-success', 'data-turbo-confirm': "确认将版本 #{version.version_label} 升级为正式版本?" %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+          <% end %>
+        </tbody>
       </table>
     <% end %>
   </div>
-</body>
-</html>
+</div>

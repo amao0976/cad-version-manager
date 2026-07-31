@@ -1,0 +1,60 @@
+<% content_for :title, '导入分类' %>
+
+<div class="page-header">
+  <h1>导入分类</h1>
+  <%= link_to '返回列表', categories_path, class: 'btn btn-outline-secondary' %>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header fw-bold">CSV 导入说明</div>
+  <div class="card-body">
+    <h5>CSV 文件格式要求：</h5>
+    <ul>
+      <li><strong>编码：</strong>UTF-8 (支持带 BOM 的 Excel 导出文件)</li>
+      <li><strong>必需列：</strong>名称 (name)、编码 (code)</li>
+      <li><strong>可选列：</strong>父分类编码 (parent_code)、排序 (sort_order)、描述 (description)</li>
+    </ul>
+
+    <div class="alert alert-info mt-3">
+      <strong>使用流程：</strong>
+      <ol class="mb-0">
+        <li>点击"导出 CSV"下载当前分类数据</li>
+        <li>在 Excel 或其他编辑器中修改数据</li>
+        <li>保存为 UTF-8 编码的 CSV 文件</li>
+        <li>上传修改后的文件完成导入</li>
+      </ol>
+    </div>
+
+    <div class="alert alert-warning mt-2">
+      <strong>注意：</strong>如果分类编码已存在，系统将更新该分类信息而不是创建新记录。父分类编码必须在文件中已存在或先于子分类出现。
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header fw-bold">上传 CSV 文件</div>
+  <div class="card-body">
+    <% if defined?(@errors) && @errors.any? %>
+      <div class="alert alert-danger">
+        <h6>导入失败，以下是错误信息：</h6>
+        <ul class="mb-0">
+          <% @errors.each do |error| %>
+            <li><%= error %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%= form_with url: categories_do_import_path, method: :post, multipart: true, data: { turbo: false } do |f| %>
+      <div class="mb-3">
+        <label class="form-label">选择 CSV 文件</label>
+        <%= file_field_tag :csv_file, class: 'form-control', accept: '.csv' %>
+        <div class="form-text">支持 .csv 格式文件</div>
+      </div>
+      <div class="mb-3">
+        <%= f.submit '开始导入', class: 'btn btn-primary' %>
+        <%= link_to '取消', categories_path, class: 'btn btn-outline-secondary ms-2' %>
+      </div>
+    <% end %>
+  </div>
+</div>

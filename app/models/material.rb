@@ -1,4 +1,5 @@
 class Material < ApplicationRecord
+  belongs_to :case_material_category, class_name: 'Category', optional: true
   has_many :material_prices, dependent: :destroy
   has_many :products, foreign_key: 'main_material_id'
   has_many :variants

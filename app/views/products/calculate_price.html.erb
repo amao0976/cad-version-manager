@@ -1,101 +1,77 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title><%= @product.name %> - 价格计算</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .header h1 { display: inline; margin-right: 20px; }
-    .header .actions { float: right; }
-    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
-    .header .btn:hover { background: #0056b3; }
-    .header .btn-danger { background: #dc3545; }
-    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background: #f8f9fa; }
-    .info-row { margin-bottom: 10px; }
-    .info-label { display: inline-block; width: 150px; font-weight: bold; color: #666; }
-    .price-total { font-size: 24px; font-weight: bold; color: #dc3545; margin-top: 20px; padding-top: 15px; border-top: 2px solid #eee; }
-    .price-highlight { color: #28a745; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1><%= @product.name %> - 价格计算</h1>
-    <div class="actions">
-      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
-      <%= link_to '返回产品', product_path(@product), class: 'btn' %>
-    </div>
-  </div>
+<% content_for :title, "#{@product.name} - 价格计算" %>
 
-  <div class="card">
-    <h2>价格计算结果</h2>
-    <div class="info-row">
-      <span class="info-label">产品名称:</span>
-      <%= @product.name %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">主材质:</span>
-      <%= @product.main_material&.name || '-' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">材质当前价:</span>
-      <%= @product.main_material&.latest_price ? "#{@product.main_material.latest_price.price_per_unit} #{@product.main_material.latest_price.currency}/#{@product.main_material.unit}" : '-' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">基础克重:</span>
-      <%= @product.base_weight ? "#{@product.base_weight}g" : '-' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">定价规则:</span>
-      <%= @price_rule&.name || '默认规则' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">工费:</span>
-      <%= @price_rule&.labor_cost ? "#{@price_rule.labor_cost} #{@product.main_material&.latest_price&.currency || 'CNY'}" : '-' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">加价率:</span>
-      <%= @price_rule&.markup_rate ? "#{(@price_rule.markup_rate * 100).round(1)}%" : '-' %>
-    </div>
+<div class="page-header">
+  <h1><%= @product.name %> - 价格计算</h1>
+  <div class="d-flex gap-2 mb-3">
+    <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
+    <%= link_to '返回产品', product_path(@product), class: 'btn btn-outline-secondary' %>
   </div>
+</div>
 
-  <div class="card">
-    <h2>各变体价格明细</h2>
-    <% if @variant_prices.empty? %>
-      <p>暂无变体数据</p>
-    <% else %>
-      <table>
-        <tr>
-          <th>SKU编码</th>
-          <th>材质</th>
-          <th>尺寸</th>
-          <th>颜色</th>
-          <th>有效克重</th>
-          <th>材质单价</th>
-          <th>材质成本</th>
-          <th>工费</th>
-          <th>加价率</th>
-          <th>总价</th>
-        </tr>
-        <% @variant_prices.each do |vp| %>
-        <tr>
-          <td><%= vp[:variant].sku_code %></td>
-          <td><%= vp[:variant].material&.name || @product.main_material&.name %></td>
-          <td><%= vp[:variant].size || '-' %></td>
-          <td><%= vp[:variant].color || '-' %></td>
-          <td><%= vp[:weight] ? "#{vp[:weight]}g" : '-' %></td>
-          <td><%= vp[:material_price] ? "#{vp[:material_price]} #{vp[:currency]}" : '-' %></td>
-          <td><%= vp[:material_cost] ? "#{vp[:material_cost].round(2)} #{vp[:currency]}" : '-' %></td>
-          <td><%= vp[:labor_cost] ? "#{vp[:labor_cost]} #{vp[:currency]}" : '-' %></td>
-          <td><%= vp[:markup_rate] ? "#{(vp[:markup_rate] * 100).round(1)}%" : '-' %></td>
-          <td><span class="price-highlight"><%= vp[:total_price] ? "#{vp[:total_price].round(2)} #{vp[:currency]}" : '-' %></span></td>
-        </tr>
-        <% end %>
-      </table>
-    <% end %>
+<div class="card">
+  <div class="card-header fw-bold">价格计算结果</div>
+  <div class="info-row">
+    <span class="info-label">产品名称:</span>
+    <%= @product.name %>
   </div>
-</body>
-</html>
+  <div class="info-row">
+    <span class="info-label">主材质:</span>
+    <%= @product.main_material&.name || '-' %>
+  </div>
+  <div class="info-row">
+    <span class="info-label">材质当前价:</span>
+    <%= @product.main_material&.latest_price ? "#{@product.main_material.latest_price.price_per_unit} #{@product.main_material.latest_price.currency}/#{@product.main_material.unit}" : '-' %>
+  </div>
+  <div class="info-row">
+    <span class="info-label">基础克重:</span>
+    <%= @product.base_weight ? "#{@product.base_weight}g" : '-' %>
+  </div>
+  <div class="info-row">
+    <span class="info-label">定价规则:</span>
+    <%= @price_rule&.name || '默认规则' %>
+  </div>
+  <div class="info-row">
+    <span class="info-label">工费:</span>
+    <%= @price_rule&.labor_cost ? "#{@price_rule.labor_cost} #{@product.main_material&.latest_price&.currency || 'CNY'}" : '-' %>
+  </div>
+  <div class="info-row">
+    <span class="info-label">加价率:</span>
+    <%= @price_rule&.markup_rate ? "#{(@price_rule.markup_rate * 100).round(1)}%" : '-' %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header fw-bold">各变体价格明细</div>
+  <% if @variant_prices.empty? %>
+    <p>暂无变体数据</p>
+  <% else %>
+    <table class="table table-hover align-middle">
+      <tr>
+        <th>SKU编码</th>
+        <th>材质</th>
+        <th>尺寸</th>
+        <th>颜色</th>
+        <th>有效克重</th>
+        <th>材质单价</th>
+        <th>材质成本</th>
+        <th>工费</th>
+        <th>加价率</th>
+        <th>总价</th>
+      </tr>
+      <% @variant_prices.each do |vp| %>
+      <tr>
+        <td><%= vp[:variant].sku_code %></td>
+        <td><%= vp[:variant].material&.name || @product.main_material&.name %></td>
+        <td><%= vp[:variant].size || '-' %></td>
+        <td><%= vp[:variant].color || '-' %></td>
+        <td><%= vp[:weight] ? "#{vp[:weight]}g" : '-' %></td>
+        <td><%= vp[:material_price] ? "#{vp[:material_price]} #{vp[:currency]}" : '-' %></td>
+        <td><%= vp[:material_cost] ? "#{vp[:material_cost].round(2)} #{vp[:currency]}" : '-' %></td>
+        <td><%= vp[:labor_cost] ? "#{vp[:labor_cost]} #{vp[:currency]}" : '-' %></td>
+        <td><%= vp[:markup_rate] ? "#{(vp[:markup_rate] * 100).round(1)}%" : '-' %></td>
+        <td><span class="price-highlight"><%= vp[:total_price] ? "#{vp[:total_price].round(2)} #{vp[:currency]}" : '-' %></span></td>
+      </tr>
+      <% end %>
+    </table>
+  <% end %>
+</div>

@@ -1,0 +1,96 @@
+<% content_for :title, @guide.title %>
+
+<div class="row">
+  <!-- 主内容区 -->
+  <div class="col-lg-9">
+    <article class="guide-article">
+      <div class="mb-3">
+        <% if @guide.guide_category %>
+          <span class="badge bg-primary"><%= @guide.guide_category.name %></span>
+        <% end %>
+        <% if @guide.product %>
+          <span class="badge bg-success">产品: <%= @guide.product.name %></span>
+        <% end %>
+      </div>
+
+      <h1 class="mb-3"><%= @guide.title %></h1>
+
+      <div class="text-muted small mb-4">
+        <% if @guide.author %>
+          作者: <%= @guide.author.name %> ·
+        <% end %>
+        <% if @guide.published_at %>
+          发布于 <%= l(@guide.published_at, format: :long) %> ·
+        <% end %>
+        阅读: <%= @guide.views_count %> 次
+      </div>
+
+      <!-- 操作按钮 -->
+      <% if user_signed_in? && (current_user.admin? || current_user.editor? || current_user.id == @guide.author_id) %>
+        <div class="mb-4 d-flex gap-2">
+          <%= link_to '编辑', edit_guide_path(@guide.slug), class: 'btn btn-sm btn-outline-secondary' %>
+          <% if @guide.draft? %>
+            <%= button_to '发布', publish_guide_path(@guide.slug), method: :patch, class: 'btn btn-sm btn-success' %>
+          <% end %>
+          <% if @guide.published? %>
+            <%= button_to '归档', archive_guide_path(@guide.slug), method: :patch, class: 'btn btn-sm btn-warning' %>
+          <% end %>
+          <%= button_to '删除', guide_path(@guide.slug), method: :delete, data: { confirm: '确定删除吗？' }, class: 'btn btn-sm btn-outline-danger' %>
+        </div>
+      <% end %>
+
+      <!-- 渲染后的 Markdown 内容 -->
+      <div class="markdown-content">
+        <%= @guide.content_html.html_safe %>
+      </div>
+    </article>
+
+    <!-- 相关文档 -->
+    <% if @related_guides.any? %>
+      <div class="mt-5">
+        <h4>相关文档</h4>
+        <ul class="list-group">
+          <% @related_guides.each do |related| %>
+            <li class="list-group-item">
+              <%= link_to related.title, guide_path(related.slug) %>
+              <% if related.guide_category %>
+                <span class="badge bg-secondary float-end"><%= related.guide_category.name %></span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- 侧边栏 -->
+  <div class="col-lg-3">
+    <div class="card sticky-top" style="top: 1rem;">
+      <div class="card-header fw-bold">文档目录</div>
+      <div class="card-body">
+        <% toc = generate_toc(@guide.content_html) %>
+        <% if toc.any? %>
+          <nav class="toc-nav">
+            <% toc.each do |item| %>
+              <div class="toc-item toc-level-<%= item[:level] %>">
+                <a href="#<%= item[:id] %>"><%= item[:text] %></a>
+              </div>
+            <% end %>
+          </nav>
+        <% else %>
+          <p class="text-muted small">暂无目录</p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header fw-bold">快速操作</div>
+      <div class="card-body">
+        <%= link_to '返回帮助中心', guides_path, class: 'btn btn-outline-primary w-100 mb-2' %>
+        <% if @guide.guide_category %>
+          <%= link_to "更多#{@guide.guide_category.name}", guides_path(category: @guide.guide_category.slug), class: 'btn btn-outline-secondary w-100' %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

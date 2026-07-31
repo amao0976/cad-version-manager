@@ -1,0 +1,104 @@
+<% content_for :title, '验货管理 - 验货申请' %>
+
+<div class="page-header mb-4">
+  <h1>验货申请管理</h1>
+  <div class="d-flex gap-2 mt-2 flex-wrap">
+    <%= link_to '新建申请', new_inspection_request_path, class: 'btn btn-primary' %>
+    <%= link_to '导出 Excel', export_inspection_requests_path, class: 'btn btn-outline-success' %>
+    <button type="button" class="btn btn-outline-info" onclick="document.getElementById('importModal').style.display='block'">
+      <i class="bi bi-upload"></i> 导入
+    </button>
+    <%= link_to '验货记录', inspection_records_path, class: 'btn btn-outline-secondary' %>
+  </div>
+</div>
+
+<!-- 导入模态框 -->
+<div id="importModal" class="modal" style="display:none">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">导入验货申请</h5>
+        <button type="button" class="btn-close" onclick="document.getElementById('importModal').style.display='none'"></button>
+      </div>
+      <div class="modal-body">
+        <p>支持 CSV、Excel 格式文件。</p>
+        <%= form_tag import_inspection_requests_path, multipart: true do %>
+          <div class="mb-3">
+            <%= file_field_tag :file, class: 'form-control', accept: '.csv,.xls,.xlsx' %>
+          </div>
+          <button type="submit" class="btn btn-primary">上传</button>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 筛选 -->
+<div class="card mb-3">
+  <div class="card-body">
+    <%= form_with url: inspection_requests_path, method: :get, class: 'row g-2 align-items-end' do |f| %>
+      <div class="col-auto">
+        <label class="form-label small">关键词</label>
+        <%= text_field_tag :keyword, params[:keyword], class: 'form-control form-control-sm', placeholder: '订单号/款号/供应商' %>
+      </div>
+      <div class="col-auto">
+        <label class="form-label small">状态</label>
+        <%= select_tag :status, options_for_select(Inspection::Request::STATUSES.map { |k, v| [v, k] }, params[:status]), include_blank: '全部', class: 'form-select form-select-sm' %>
+      </div>
+      <div class="col-auto">
+        <%= f.submit '筛选', class: 'btn btn-sm btn-outline-primary' %>
+        <%= link_to '重置', inspection_requests_path, class: 'btn btn-sm btn-outline-secondary' %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- 列表 -->
+<div class="card">
+  <div class="card-body table-responsive-wrap">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>申请单号</th>
+          <th>款号</th>
+          <th>数量</th>
+          <th>检验类型</th>
+          <th>申请日期</th>
+          <th>供应商</th>
+          <th>状态</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @requests.each do |req| %>
+          <tr>
+            <td><%= link_to req.order_number, inspection_request_path(req) %></td>
+            <td><%= req.style_number %></td>
+            <td><%= req.quantity %></td>
+            <td><%= req.inspection_type %></td>
+            <td><%= l(req.requested_date, format: :short) %></td>
+            <td><%= req.supplier_name || req.supplier.name %></td>
+            <td>
+              <span class="badge" style="background-color: <%= req.status_color %>; color: white"><%= req.status_label %></span>
+            </td>
+            <td>
+              <%= link_to '查看', inspection_request_path(req), class: 'btn btn-sm btn-outline-primary' %>
+              <% if req.may_schedule? %>
+                <%= button_to '排期', schedule_inspection_request_path(req), method: :patch, class: 'btn btn-sm btn-outline-warning' %>
+              <% end %>
+              <% if req.can_create_inspection? %>
+                <%= link_to '创建记录', new_inspection_inspection_request_path(req), class: 'btn btn-sm btn-outline-success' %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @requests.respond_to?(:next_page) %>
+      <%= pagy_nav(@pagy) %>
+    <% end %>
+    <% if @requests.empty? %>
+      <p class="text-muted text-center">暂无验货申请</p>
+    <% end %>
+  </div>
+</div>

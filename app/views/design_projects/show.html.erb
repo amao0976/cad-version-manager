@@ -1,0 +1,60 @@
+<% content_for :title, @design_project.name %>
+
+<div class="page-header">
+  <div>
+    <h1><i class="bi bi-folder2-open"></i> <%= @design_project.name %></h1>
+    <div class="text-muted" style="font-size: 0.9rem;">项目详情</div>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to '返回列表', design_projects_path, class: 'btn btn-outline-secondary' %>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header"><span><i class="bi bi-info-circle"></i> 基本信息</span></div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="info-row">
+          <span class="info-label">名称</span>
+          <span class="info-value"><%= @design_project.name %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">状态</span>
+          <span class="info-value"><span class="badge bg-secondary"><%= @design_project.status %></span></span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="info-row">
+          <span class="info-label">图纸数</span>
+          <span class="info-value"><span class="badge bg-primary"><%= @drawings.count %></span></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">创建时间</span>
+          <span class="info-value"><%= @design_project.created_at.strftime('%Y-%m-%d %H:%M') %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span><i class="bi bi-file-earmark-blueprint"></i> 关联图纸</span></div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr><th>名称</th><th>文件类型</th><th>版本数</th><th>操作</th></tr>
+      </thead>
+      <tbody>
+        <% @drawings.each do |drawing| %>
+        <tr>
+          <td><%= link_to drawing.name, design_drawing_path(drawing), class: 'fw-semibold' %></td>
+          <td><%= drawing.file_type %></td>
+          <td><span class="badge bg-primary"><%= drawing.drawing_versions.count %></span></td>
+          <td><%= link_to '查看', design_drawing_path(drawing), class: 'btn btn-sm btn-outline-primary' %></td>
+        </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

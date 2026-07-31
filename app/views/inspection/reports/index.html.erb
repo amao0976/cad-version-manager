@@ -1,0 +1,97 @@
+<% content_for :title, '验货管理 - 验货报告' %>
+
+<div class="page-header mb-4">
+  <h1>验货报告</h1>
+  <div class="d-flex gap-2 mt-2 flex-wrap">
+    <%= link_to '验货记录', inspection_records_path, class: 'btn btn-outline-secondary' %>
+    <%= link_to '验货申请', inspection_requests_path, class: 'btn btn-outline-secondary' %>
+  </div>
+</div>
+
+<div class="alert alert-info">
+  <i class="bi bi-info-circle"></i>
+  验货报告需从<strong>验货记录</strong>创建。前往验货记录列表，点击「创建报告」即可生成对应的验货报告。
+  <%= link_to '前往验货记录', inspection_records_path, class: 'alert-link' %>
+</div>
+
+<!-- 筛选 -->
+<div class="card mb-3">
+  <div class="card-body">
+    <%= form_with url: inspection_reports_path, method: :get, class: 'row g-2 align-items-end' do |f| %>
+      <div class="col-auto">
+        <label class="form-label small">关键词</label>
+        <%= text_field_tag :keyword, params[:keyword], class: 'form-control form-control-sm', placeholder: '订单号/参考号/供应商' %>
+      </div>
+      <div class="col-auto">
+        <label class="form-label small">报告状态</label>
+        <%= select_tag :status, options_for_select(Inspection::Report::STATUSES.map { |k, v| [v, k] }, params[:status]), include_blank: '全部', class: 'form-select form-select-sm' %>
+      </div>
+      <div class="col-auto">
+        <%= f.submit '筛选', class: 'btn btn-sm btn-outline-primary' %>
+        <%= link_to '重置', inspection_reports_path, class: 'btn btn-sm btn-outline-secondary' %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- 报告列表 -->
+<div class="card">
+  <div class="card-body table-responsive-wrap">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>创建时间</th>
+          <th>订单号</th>
+          <th>参考号</th>
+          <th>产品</th>
+          <th>供应商</th>
+          <th>验货日期</th>
+          <th>检验结果</th>
+          <th>报告状态</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @reports.each do |report| %>
+          <% rec = report.inspection_record %>
+          <tr>
+            <td><%= l(report.created_at, format: :short) %></td>
+            <td><%= rec.order_no %></td>
+            <td><%= rec.reference_no %></td>
+            <td><%= rec.product&.name || '-' %></td>
+            <td><%= rec.supplier_name || '-' %></td>
+            <td><%= rec.inspection_date ? l(rec.inspection_date, format: :short) : '-' %></td>
+            <td>
+              <% if rec.result == 'pass' %>
+                <span class="badge bg-success">合格</span>
+              <% elsif rec.result == 'fail' %>
+                <span class="badge bg-danger">不合格</span>
+              <% else %>
+                <span class="badge bg-secondary">有条件</span>
+              <% end %>
+            </td>
+            <td>
+              <% if report.status == 'completed' %>
+                <span class="badge bg-success">已完成</span>
+              <% else %>
+                <span class="badge bg-warning">草稿</span>
+              <% end %>
+            </td>
+            <td>
+              <%= link_to '查看', inspection_record_report_path(rec), class: 'btn btn-sm btn-outline-primary' %>
+              <%= link_to '编辑', edit_inspection_record_report_path(rec), class: 'btn btn-sm btn-outline-secondary' %>
+              <%= link_to 'PDF', export_pdf_inspection_record_report_path(rec), class: 'btn btn-sm btn-outline-danger' %>
+              <%= link_to 'Excel', export_excel_inspection_record_report_path(rec), class: 'btn btn-sm btn-outline-success' %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @reports.respond_to?(:next_page) %>
+      <%= pagy_nav(@pagy) %>
+    <% end %>
+    <% if @reports.empty? %>
+      <p class="text-muted text-center">暂无验货报告</p>
+    <% end %>
+  </div>
+</div>

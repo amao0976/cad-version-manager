@@ -1,0 +1,83 @@
+<% content_for :title, '颜色管理' %>
+
+<div class="page-header">
+  <h1>颜色管理</h1>
+  <% if current_user.admin? %>
+    <div class="btn-group">
+      <%= link_to '新增颜色', new_color_path, class: 'btn btn-primary' %>
+      <%= link_to '批量导入 CSV', colors_import_path, class: 'btn btn-outline-primary' %>
+    </div>
+  <% end %>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row g-3 align-items-end">
+      <%= form_with url: colors_path, method: :get, local: true, class: 'row g-3 align-items-end' do %>
+        <div class="col-md-4">
+          <label class="form-label">关键词</label>
+          <%= text_field_tag :keyword, params[:keyword], placeholder: '名称或编码', class: 'form-control' %>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">颜色类型</label>
+          <%= select_tag :color_type, options_for_select([['全部类型', '']] + Color.color_types.map { |label, value| [label, value] }, params[:color_type]), class: 'form-select' %>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+          <%= submit_tag '搜索', class: 'btn btn-primary flex-fill' %>
+          <%= link_to '重置', colors_path, class: 'btn btn-outline-secondary' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header fw-bold">颜色列表 (<%= @colors.count %>)</div>
+  <table class="table table-hover align-middle">
+    <thead>
+      <tr>
+        <th>颜色预览</th>
+        <th>名称</th>
+        <th>编码</th>
+        <th>类型</th>
+        <th>状态</th>
+        <th>描述</th>
+        <% if current_user.admin? %>
+          <th>操作</th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% @colors.each do |color| %>
+        <tr>
+          <td>
+            <% if color.hex_code.present? %>
+              <div style="background-color: <%= color.hex_code %>; width: 30px; height: 30px; border: 1px solid #ccc; border-radius: 4px;"></div>
+            <% else %>
+              <div style="background-color: #eee; width: 30px; height: 30px; border: 1px solid #ccc; border-radius: 4px;"></div>
+            <% end %>
+          </td>
+          <td><%= color.name %></td>
+          <td><code><%= color.code %></code></td>
+          <td>
+            <span class="badge bg-info"><%= color.color_type_label %></span>
+          </td>
+          <td>
+            <% if color.active? %>
+              <span class="badge bg-success">启用</span>
+            <% else %>
+              <span class="badge bg-secondary">停用</span>
+            <% end %>
+          </td>
+          <td><%= truncate(color.description, length: 50) %></td>
+          <% if current_user.admin? %>
+            <td>
+              <%= link_to '编辑', edit_color_path(color), class: 'btn btn-sm btn-outline-primary' %>
+              <%= button_to '删除', color_path(color), method: :delete, form: { class: 'd-inline' }, data: { turbo_confirm: '确认删除?' }, class: 'btn btn-sm btn-outline-danger' %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

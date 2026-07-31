@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "验货管理",
+    "slug": "inspection-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "inspection",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cadversionmanager.inspection"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#2563EB"
+      },
+      "package": "com.cadversionmanager.inspection"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

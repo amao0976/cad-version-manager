@@ -1,0 +1,66 @@
+default:
+  name_zh: "通用"
+  name_en: "Default"
+  measurement_points:
+    - measurement_point: "Reference Point"
+      tolerance: "1"
+
+t_shirt:
+  name_zh: "T恤"
+  name_en: "T-shirt"
+  measurement_points:
+    - measurement_point: "Chest Width"
+      tolerance: "1"
+    - measurement_point: "Body Length"
+      tolerance: "1"
+    - measurement_point: "Shoulder Width"
+      tolerance: "0.5"
+    - measurement_point: "Sleeve Length"
+      tolerance: "1"
+    - measurement_point: "Hem Width"
+      tolerance: "1"
+
+pants:
+  name_zh: "裤子"
+  name_en: "Pants"
+  measurement_points:
+    - measurement_point: "Waist"
+      tolerance: "1"
+    - measurement_point: "Hip"
+      tolerance: "1"
+    - measurement_point: "Inseam"
+      tolerance: "1.5"
+    - measurement_point: "Thigh"
+      tolerance: "1"
+    - measurement_point: "Leg Opening"
+      tolerance: "0.5"
+
+jacket:
+  name_zh: "夹克"
+  name_en: "Jacket"
+  measurement_points:
+    - measurement_point: "Chest"
+      tolerance: "1.5"
+    - measurement_point: "Body Length"
+      tolerance: "1.5"
+    - measurement_point: "Shoulder"
+      tolerance: "1"
+    - measurement_point: "Sleeve Length"
+      tolerance: "1.5"
+
+watch:
+  name_zh: "手表"
+  name_en: "Watch"
+  measurement_points:
+    - measurement_point: "Case Diameter"
+      tolerance: "0.1"
+    - measurement_point: "Case Thickness"
+      tolerance: "0.1"
+    - measurement_point: "Lug Width"
+      tolerance: "0.1"
+    - measurement_point: "Strap Width"
+      tolerance: "0.5"
+    - measurement_point: "Overall Length"
+      tolerance: "1"
+    - measurement_point: "Weight"
+      tolerance: "0.5"

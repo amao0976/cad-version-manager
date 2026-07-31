@@ -1,5 +1,6 @@
 class CategoriesController < ApplicationController
   before_action :authenticate_user!
+  before_action :require_admin, only: [:new, :create, :edit, :update, :destroy, :import, :do_import, :export]
   before_action :set_category, only: [:show, :edit, :update, :destroy]
 
   def index
@@ -43,6 +44,32 @@ class CategoriesController < ApplicationController
   def destroy
     @category.destroy
     redirect_to categories_path, notice: '分类删除成功'
+  end
+
+  def import
+  end
+
+  def do_import
+    unless params[:csv_file].present?
+      redirect_to categories_import_path, alert: '请选择 CSV 文件'
+      return
+    end
+
+    @import_service = CategoryImportService.new(params[:csv_file])
+    @import_service.call
+
+    if @import_service.success?
+      redirect_to categories_path,
+                  notice: "导入成功！新增 #{@import_service.imported_count} 条，更新 #{@import_service.updated_count} 条"
+    else
+      @errors = @import_service.errors
+      render :import, status: :unprocessable_entity
+    end
+  end
+
+  def export
+    csv_data = CategoryImportService.export
+    send_data "\uFEFF#{csv_data}", filename: "categories_export_#{Time.current.strftime('%Y%m%d_%H%M%S')}.csv", type: 'text/csv'
   end
 
   private

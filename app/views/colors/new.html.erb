@@ -1,0 +1,62 @@
+<% content_for :title, '新增颜色' %>
+
+<div class="page-header">
+  <h1>新增颜色</h1>
+  <%= link_to '返回列表', colors_path, class: 'btn btn-outline-secondary' %>
+</div>
+
+<div class="card">
+  <div class="card-header fw-bold">颜色信息</div>
+  <% if @color.errors.any? %>
+    <div class="alert alert-danger">
+      <% @color.errors.full_messages.each do |msg| %>
+        <p><%= msg %></p>
+      <% end %>
+    </div>
+  <% end %>
+  <%= form_with model: @color, url: colors_path, method: :post, data: { turbo: false } do |f| %>
+    <div class="mb-3">
+      <%= f.label :name, '颜色名称', class: 'form-label' %>
+      <%= f.text_field :name, class: 'form-control', placeholder: '如：金色、玫瑰金、银色等' %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :code, '颜色编码', class: 'form-label' %>
+      <%= f.text_field :code, class: 'form-control', placeholder: '自定义编码，如：GOLD、ROSE_GOLD' %>
+      <div class="form-text">用于系统内部识别，支持自定义</div>
+    </div>
+    <div class="mb-3">
+      <%= f.label :color_type, '颜色类型', class: 'form-label' %>
+      <%= f.select :color_type, options_for_select(Color.color_types.map { |label, value| [label, value] }, @color.color_type), {}, class: 'form-select' %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :hex_code, '颜色代码 (HEX)', class: 'form-label' %>
+      <div class="input-group">
+        <%= f.text_field :hex_code, class: 'form-control', placeholder: '#FFD700' %>
+        <div class="input-group-text" id="color-preview" style="width: 50px; background-color: #eee; border: 1px solid #ccc;"></div>
+      </div>
+      <div class="form-text">用于颜色预览显示，格式如 #FFD700</div>
+    </div>
+    <div class="mb-3">
+      <%= f.label :description, '描述', class: 'form-label' %>
+      <%= f.text_area :description, class: 'form-control', rows: 3 %>
+    </div>
+    <div class="mb-3 form-check">
+      <%= f.check_box :active, class: 'form-check-input' %>
+      <%= f.label :active, '启用', class: 'form-check-label' %>
+    </div>
+    <div class="mb-3">
+      <%= f.submit '创建颜色', class: 'btn btn-primary' %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  document.getElementById('color_hex_code')?.addEventListener('input', function(e) {
+    const preview = document.getElementById('color-preview');
+    if (e.target.value && e.target.value.match(/^#[0-9A-Fa-f]{6}$/)) {
+      preview.style.backgroundColor = e.target.value;
+    } else {
+      preview.style.backgroundColor = '#eee';
+    }
+  });
+</script>

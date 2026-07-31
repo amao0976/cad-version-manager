@@ -1,0 +1,86 @@
+<% content_for :title, '用户详情' %>
+
+<div class="page-header">
+  <div>
+    <h1><i class="bi bi-person"></i> 用户详情</h1>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to '返回列表', admin_users_path, class: 'btn btn-outline-secondary' %>
+    <%= link_to '编辑', edit_admin_user_path(@user), class: 'btn btn-primary' %>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header"><i class="bi bi-info-circle"></i> 基本信息</div>
+  <div class="card-body">
+    <table class="table table-borderless mb-0">
+      <tr>
+        <th style="width: 150px;">邮箱</th>
+        <td><%= @user.email %></td>
+      </tr>
+      <tr>
+        <th>姓名</th>
+        <td><%= @user.name %></td>
+      </tr>
+      <tr>
+        <th>角色</th>
+        <td>
+          <%
+            role_labels = {
+              'admin' => ['管理员', 'bg-danger'],
+              'manager' => ['经理', 'bg-warning'],
+              'engineer' => ['工程师', 'bg-info'],
+              'viewer' => ['访客', 'bg-secondary']
+            }
+            label, badge_class = role_labels[@user.role] || [@user.role, 'bg-secondary']
+          %>
+          <span class="badge <%= badge_class %>"><%= label %></span>
+        </td>
+      </tr>
+      <tr>
+        <th>注册时间</th>
+        <td><%= @user.created_at.strftime('%Y-%m-%d %H:%M:%S') %></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><i class="bi bi-shield-check"></i> 登录记录</div>
+  <div class="card-body">
+    <table class="table table-borderless mb-0">
+      <tr>
+        <th style="width: 150px;">登录次数</th>
+        <td><%= @user.sign_in_count %></td>
+      </tr>
+      <tr>
+        <th>当前登录时间</th>
+        <td>
+          <% if @user.current_sign_in_at %>
+            <%= @user.current_sign_in_at.strftime('%Y-%m-%d %H:%M:%S') %>
+          <% else %>
+            <span class="text-muted">-</span>
+          <% end %>
+        </td>
+      </tr>
+      <tr>
+        <th>上次登录时间</th>
+        <td>
+          <% if @user.last_sign_in_at %>
+            <%= @user.last_sign_in_at.strftime('%Y-%m-%d %H:%M:%S') %>
+          <% else %>
+            <span class="text-muted">-</span>
+          <% end %>
+        </td>
+      </tr>
+      <tr>
+        <th>当前登录 IP</th>
+        <td><%= @user.current_sign_in_ip || '-' %></td>
+      </tr>
+      <tr>
+        <th>上次登录 IP</th>
+        <td><%= @user.last_sign_in_ip || '-' %></td>
+      </tr>
+    </table>
+  </div>
+</div>

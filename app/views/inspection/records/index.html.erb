@@ -1,0 +1,111 @@
+<% content_for :title, '验货管理 - 验货记录' %>
+
+<div class="page-header mb-4">
+  <h1>验货记录</h1>
+  <div class="d-flex gap-2 mt-2 flex-wrap">
+    <%= link_to '新建记录', new_inspection_record_path, class: 'btn btn-primary' %>
+    <%= link_to '导出 Excel', export_inspection_records_path, class: 'btn btn-outline-success' %>
+    <button type="button" class="btn btn-outline-info" onclick="document.getElementById('importModal').style.display='block'">
+      <i class="bi bi-upload"></i> 导入
+    </button>
+    <%= link_to '验货申请', inspection_requests_path, class: 'btn btn-outline-secondary' %>
+  </div>
+</div>
+
+<!-- 导入模态框 -->
+<div id="importModal" class="modal" style="display:none">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">导入验货记录</h5>
+        <button type="button" class="btn-close" onclick="document.getElementById('importModal').style.display='none'"></button>
+      </div>
+      <div class="modal-body">
+        <p>支持 CSV、Excel 格式文件。</p>
+        <%= form_tag import_inspection_records_path, multipart: true do %>
+          <div class="mb-3">
+            <%= file_field_tag :file, class: 'form-control', accept: '.csv,.xls,.xlsx' %>
+          </div>
+          <button type="submit" class="btn btn-primary">上传</button>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 筛选 -->
+<div class="card mb-3">
+  <div class="card-body">
+    <%= form_with url: inspection_records_path, method: :get, class: 'row g-2 align-items-end' do |f| %>
+      <div class="col-auto">
+        <label class="form-label small">关键词</label>
+        <%= text_field_tag :keyword, params[:keyword], class: 'form-control form-control-sm', placeholder: '订单号/款号/供应商' %>
+      </div>
+      <div class="col-auto">
+        <label class="form-label small">检验结果</label>
+        <%= select_tag :result, options_for_select(Inspection::Record::RESULTS.map { |k, v| [v, k] }, params[:result]), include_blank: '全部', class: 'form-select form-select-sm' %>
+      </div>
+      <div class="col-auto">
+        <%= f.submit '筛选', class: 'btn btn-sm btn-outline-primary' %>
+        <%= link_to '重置', inspection_records_path, class: 'btn btn-sm btn-outline-secondary' %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- 列表 -->
+<div class="card">
+  <div class="card-body table-responsive-wrap">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>验货日期</th>
+          <th>产品</th>
+          <th>订单号</th>
+          <th>款号</th>
+          <th>供应商</th>
+          <th>数量</th>
+          <th>缺陷(大/小)</th>
+          <th>结果</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @records.each do |rec| %>
+          <tr>
+            <td><%= l(rec.inspection_date, format: :short) %></td>
+            <td><%= rec.product&.name || '-' %></td>
+            <td><%= rec.order_no %></td>
+            <td><%= rec.reference_no %></td>
+            <td><%= rec.supplier_name || '-' %></td>
+            <td><%= rec.shipment_quantity %></td>
+            <td><%= rec.major_defects %> / <%= rec.minor_defects %></td>
+            <td>
+              <% if rec.result == 'pass' %>
+                <span class="badge bg-success">合格</span>
+              <% elsif rec.result == 'fail' %>
+                <span class="badge bg-danger">不合格</span>
+              <% else %>
+                <span class="badge bg-secondary">有条件</span>
+              <% end %>
+            </td>
+            <td>
+              <%= link_to '查看', inspection_record_path(rec), class: 'btn btn-sm btn-outline-primary' %>
+              <% unless rec.report %>
+                <%= link_to '创建报告', new_report_inspection_record_path(rec), class: 'btn btn-sm btn-outline-success' %>
+              <% else %>
+                <%= link_to '查看报告', inspection_record_report_path(rec, rec.report), class: 'btn btn-sm btn-outline-info' %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @records.respond_to?(:next_page) %>
+      <%= pagy_nav(@pagy) %>
+    <% end %>
+    <% if @records.empty? %>
+      <p class="text-muted text-center">暂无验货记录</p>
+    <% end %>
+  </div>
+</div>

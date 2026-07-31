@@ -1,0 +1,46 @@
+<% if report.size_columns.any? || report.size_rows.any? %>
+<div class="card mb-3">
+  <div class="card-header fw-bold">尺寸检验表</div>
+  <div class="card-body table-responsive-wrap">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th rowspan="2">测量点</th>
+          <th rowspan="2">公差</th>
+          <% report.size_columns.each do |col| %>
+            <th colspan="3"><%= col %></th>
+          <% end %>
+        </tr>
+        <tr>
+          <% report.size_columns.each do %>
+            <th>标称</th>
+            <th>实测</th>
+            <th>结果</th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% report.size_rows.each do |row| %>
+          <tr>
+            <td><%= row["measurement_point"] %></td>
+            <td>&plusmn;<%= row["tolerance"] %></td>
+            <% report.size_columns.each do |col| %>
+              <% vals = (row["values"] || {})[col] || {} %>
+              <td><%= vals["nominal"] %></td>
+              <td><%= vals["actual"] %></td>
+              <% result = report.pass_fail_for(row, col) %>
+              <td>
+                <% if result == 'pass' %>
+                  <span class="text-success">&#10003; 合格</span>
+                <% elsif result == 'fail' %>
+                  <span class="text-danger">&#10007; 不合格</span>
+                <% end %>
+              </td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% end %>

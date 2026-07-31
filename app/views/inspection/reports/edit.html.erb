@@ -1,0 +1,14 @@
+<% content_for :title, '编辑验货报告' %>
+
+<div class="page-header mb-4">
+  <h1>编辑验货报告</h1>
+  <div class="d-flex gap-2 mt-2">
+    <%= link_to '返回报告', inspection_record_report_path(@record), class: 'btn btn-outline-secondary' %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <%= render 'form', report: @report, record: @record %>
+  </div>
+</div>

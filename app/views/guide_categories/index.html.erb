@@ -1,0 +1,76 @@
+<% content_for :title, '文档分类管理' %>
+
+<div class="page-header mb-4">
+  <h1>文档分类管理</h1>
+  <div class="d-flex gap-2 mt-2">
+    <%= link_to '返回文档管理', admin_guides_path, class: 'btn btn-outline-secondary' %>
+    <%= link_to '返回帮助中心', guides_path, class: 'btn btn-outline-secondary' %>
+  </div>
+</div>
+
+<div class="row">
+  <!-- 新建分类表单 -->
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header fw-bold">添加新分类</div>
+      <div class="card-body">
+        <%= form_with model: GuideCategory.new, url: guide_categories_path, method: :post do |f| %>
+          <div class="mb-3">
+            <label class="form-label">分类名称 *</label>
+            <%= f.text_field :name, class: 'form-control', required: true, placeholder: '如：使用指南' %>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">描述</label>
+            <%= f.text_area :description, class: 'form-control', rows: 3, placeholder: '分类说明（可选）' %>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">排序</label>
+            <%= f.number_field :sort_order, class: 'form-control', value: 0 %>
+          </div>
+          <%= f.submit '添加分类', class: 'btn btn-primary w-100' %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分类列表 -->
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-body table-responsive-wrap">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>排序</th>
+              <th>名称</th>
+              <th>描述</th>
+              <th>文档数</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @categories.each do |category| %>
+              <tr>
+                <td><%= category.sort_order %></td>
+                <td>
+                  <strong><%= category.name %></strong>
+                  <div class="text-muted small">slug: <%= category.slug %></div>
+                </td>
+                <td><%= category.description || '-' %></td>
+                <td>
+                  <span class="badge bg-info"><%= category.guides.count %></span>
+                </td>
+                <td>
+                  <%= link_to '编辑', edit_guide_category_path(category.slug), class: 'btn btn-sm btn-outline-secondary' %>
+                  <%= button_to '删除', guide_category_path(category.slug), method: :delete, data: { confirm: '确定删除吗？' }, class: 'btn btn-sm btn-outline-danger' %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <% if @categories.empty? %>
+          <p class="text-muted text-center">暂无分类</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

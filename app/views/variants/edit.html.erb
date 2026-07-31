@@ -1,81 +1,58 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>编辑变体</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .header h1 { display: inline; margin-right: 20px; }
-    .header .btn { padding: 8px 16px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px; float: right; }
-    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-    .form-group textarea { height: 100px; }
-    .btn-submit { padding: 12px 30px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
-    .btn-submit:hover { background: #0056b3; }
-    .errors { color: #dc3545; margin-bottom: 15px; }
-    .product-info { margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; }
-    .product-info span { font-weight: bold; color: #007bff; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>编辑变体</h1>
-    <%= link_to '返回列表', product_variants_path(@product), class: 'btn' %>
-  </div>
+<% content_for :title, '编辑变体' %>
 
-  <div class="card">
-    <h2>变体信息</h2>
-    <div class="product-info">
-      产品：<span><%= @product.name %></span> | 
-      编码：<span><%= @product.product_code %></span>
-    </div>
-    <% if @variant.errors.any? %>
-      <div class="errors">
-        <% @variant.errors.full_messages.each do |msg| %>
-          <p><%= msg %></p>
-        <% end %>
-      </div>
-    <% end %>
-    <%= form_for [@product, @variant], url: product_variant_path(@product, @variant), method: :patch do |f| %>
-      <div class="form-group">
-        <%= f.label :sku_code, 'SKU编码' %>
-        <%= f.text_field :sku_code %>
-      </div>
-      <div class="form-group">
-        <%= f.label :material_id, '材质' %>
-        <%= f.collection_select :material_id, @materials, :id, :name, { include_blank: '使用产品默认材质' } %>
-      </div>
-      <div class="form-group">
-        <%= f.label :size, '尺寸' %>
-        <%= f.text_field :size %>
-      </div>
-      <div class="form-group">
-        <%= f.label :color, '颜色' %>
-        <%= f.text_field :color %>
-      </div>
-      <div class="form-group">
-        <%= f.label :gemstone, '宝石' %>
-        <%= f.text_field :gemstone %>
-      </div>
-      <div class="form-group">
-        <%= f.label :weight, '重量(g)' %>
-        <%= f.text_field :weight %>
-      </div>
-      <div class="form-group">
-        <%= f.label :status, '状态' %>
-        <%= f.select :status, [['启用', 'active'], ['停用', 'inactive']] %>
-      </div>
-      <div class="form-group">
-        <%= f.label :description, '描述' %>
-        <%= f.text_area :description %>
-      </div>
-      <div class="form-group">
-        <%= f.submit '更新变体', class: 'btn-submit' %>
-      </div>
-    <% end %>
+<div class="page-header">
+  <h1>编辑变体</h1>
+  <%= link_to '返回列表', product_variants_path(@product), class: 'btn btn-outline-secondary' %>
+</div>
+
+<div class="card">
+  <div class="card-header fw-bold">变体信息</div>
+  <div class="product-info">
+    产品：<span><%= @product.name %></span> | 
+    编码：<span><%= @product.product_code %></span>
   </div>
-</body>
-</html>
+  <% if @variant.errors.any? %>
+    <div class="alert alert-danger">
+      <% @variant.errors.full_messages.each do |msg| %>
+        <p><%= msg %></p>
+      <% end %>
+    </div>
+  <% end %>
+  <%= form_with model: [@product, @variant], url: product_variant_path(@product, @variant), method: :patch, data: { turbo: false } do |f| %>
+    <div class="mb-3">
+      <%= f.label :sku_code, 'SKU编码', class: 'form-label'%>
+      <%= f.text_field :sku_code, class: 'form-control' %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :material_id, '材质', class: 'form-label'%>
+      <%= f.collection_select :material_id, @materials, :id, :name, { include_blank: '使用产品默认材质' }, class: 'form-select' %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :size, '尺寸', class: 'form-label'%>
+      <%= f.text_field :size, class: 'form-control' %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :color, '颜色', class: 'form-label'%>
+      <%= f.text_field :color, class: 'form-control' %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :gemstone, '宝石', class: 'form-label'%>
+      <%= f.text_field :gemstone, class: 'form-control' %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :weight, '重量(g)', class: 'form-label'%>
+      <%= f.text_field :weight, class: 'form-control' %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :status, '状态', class: 'form-label'%>
+      <%= f.select :status, [['启用', 'active'], ['停用', 'inactive']], {}, class: 'form-select' %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :description, '描述', class: 'form-label'%>
+      <%= f.text_area :description, class: 'form-control' %>
+    </div>
+    <div class="mb-3">
+      <%= f.submit '更新变体', class: 'btn btn-primary' %>
+    </div>
+  <% end %>
+</div>

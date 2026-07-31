@@ -1,150 +1,170 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title><%= @bom.name %></title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .header h1 { display: inline; margin-right: 20px; }
-    .header .actions { float: right; }
-    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
-    .header .btn:hover { background: #0056b3; }
-    .header .btn-danger { background: #dc3545; }
-    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
-    .info-row { margin-bottom: 10px; }
-    .info-label { display: inline-block; width: 120px; font-weight: bold; color: #666; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background: #f8f9fa; }
-    .tree-container { margin-top: 15px; }
-    .tree-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
-    .tree-item:hover { background: #f8f9fa; }
-    .tree-indent { display: inline-block; width: 20px; }
-    .tree-expand { cursor: pointer; font-size: 14px; color: #007bff; margin-right: 5px; user-select: none; }
-    .tree-expand:hover { color: #0056b3; }
-    .tree-icon { margin-right: 8px; }
-    .tree-content { flex: 1; display: flex; justify-content: space-between; }
-    .tree-info { display: flex; gap: 20px; flex-wrap: wrap; }
-    .tree-info-item { display: flex; align-items: center; }
-    .tree-info-label { font-weight: bold; color: #666; margin-right: 5px; }
-    .tree-children { display: none; }
-    .tree-children.expanded { display: block; }
-    .level-1 { padding-left: 0; }
-    .level-2 { padding-left: 25px; }
-    .level-3 { padding-left: 50px; }
-    .level-4 { padding-left: 75px; }
-    .btn-small { padding: 4px 10px; font-size: 12px; }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
-    .badge-in_house { background: #d4edda; color: #155724; }
-    .badge-purchased { background: #cce5ff; color: #004085; }
-    .badge-outsourced { background: #fff3cd; color: #856404; }
-    .badge-borrowed { background: #f8d7da; color: #721c24; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1><%= @bom.name %> - BOM详情</h1>
-    <div class="actions">
-      <%= link_to '返回列表', boms_path, class: 'btn btn-danger' %>
-      <%= link_to '添加物料项', bom_add_item_path(@bom), class: 'btn' %>
+<% content_for :title, @bom.name %>
+
+<div class="page-header">
+  <div>
+    <h1><i class="bi bi-box-seam"></i> <%= @bom.name %></h1>
+    <div class="text-muted" style="font-size: 0.9rem;">BOM 详情</div>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to '返回列表', boms_path, class: 'btn btn-outline-secondary' %>
+    <%= link_to '添加物料项', bom_add_item_path(@bom), class: 'btn btn-primary' %>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <span><i class="bi bi-info-circle"></i> 基本信息</span>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="info-row">
+              <span class="info-label">项目</span>
+              <span class="info-value"><%= @bom.design_project&.name || '-' %></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">关联产品</span>
+              <span class="info-value"><%= @bom.product ? link_to(@bom.product.name, product_path(@bom.product)) : '未关联' %></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">关联图纸</span>
+              <span class="info-value"><%= @bom.design_drawing&.name || '未关联' %></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">版本</span>
+              <span class="info-value"><span class="badge bg-light text-dark"><%= @bom.revision %></span></span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="info-row">
+              <span class="info-label">状态</span>
+              <span class="info-value">
+                <% if @bom.status == 'draft' %>
+                  <span class="badge badge-draft">草稿</span>
+                <% elsif @bom.status == 'approved' %>
+                  <span class="badge badge-approved">已审批</span>
+                <% elsif @bom.status == 'released' %>
+                  <span class="badge badge-released">已发布</span>
+                <% elsif @bom.status == 'archived' %>
+                  <span class="badge badge-archived">已归档</span>
+                <% end %>
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">描述</span>
+              <span class="info-value"><%= @bom.description || '-' %></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">创建人</span>
+              <span class="info-value"><%= @bom.created_by&.name || @bom.created_by&.email %></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">创建时间</span>
+              <span class="info-value"><%= @bom.created_at.strftime('%Y-%m-%d %H:%M') %></span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-
-  <div class="card">
-    <h2>基本信息</h2>
-    <div class="info-row">
-      <span class="info-label">项目:</span>
-      <%= @bom.design_project&.name %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">关联产品:</span>
-      <%= @bom.product ? link_to(@bom.product.name, product_path(@bom.product)) : '未关联' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">关联图纸:</span>
-      <%= @bom.design_drawing&.name || '未关联' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">版本:</span>
-      <%= @bom.revision %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">状态:</span>
-      <%= @bom.status %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">描述:</span>
-      <%= @bom.description || '-' %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">创建人:</span>
-      <%= @bom.created_by&.name || @bom.created_by&.email %>
-    </div>
-    <div class="info-row">
-      <span class="info-label">创建时间:</span>
-      <%= @bom.created_at.strftime('%Y-%m-%d %H:%M') %>
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header"><span><i class="bi bi-bar-chart"></i> 统计</span></div>
+      <div class="card-body">
+        <div class="d-flex justify-content-around text-center">
+          <div>
+            <div class="display-4 fw-bold text-primary"><%= @bom.bom_items.count %></div>
+            <div class="text-muted" style="font-size: 0.85rem;">物料项</div>
+          </div>
+          <div>
+            <div class="display-4 fw-bold text-success"><%= @bom.bom_items.sum(:quantity) %></div>
+            <div class="text-muted" style="font-size: 0.85rem;">总数量</div>
+          </div>
+          <div>
+            <div class="display-4 fw-bold text-warning"><%= @bom.bom_items.sum(:weight).round(2) %></div>
+            <div class="text-muted" style="font-size: 0.85rem;">总重量(g)</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+</div>
 
-  <div class="card">
-    <h2>物料树</h2>
-    <% if @bom.bom_items.empty? %>
-      <p>暂无物料项</p>
-    <% else %>
+<% if @bom.bom_items.any? %>
+<div class="card mb-4">
+  <div class="card-header"><span><i class="bi bi-diagram-3"></i> 物料树</span></div>
+  <div class="card-body">
+    <%= turbo_frame_tag "bom_tree" do %>
       <div class="tree-container">
         <%= render partial: 'bom_tree_item', collection: @bom.bom_items.where(parent_id: nil), locals: { bom: @bom } %>
       </div>
     <% end %>
   </div>
+</div>
+<% end %>
 
-  <div class="card">
-    <h2>物料清单（表格）</h2>
-    <table>
-      <tr>
-        <th>层级</th>
-        <th>物料编号</th>
-        <th>物料名称</th>
-        <th>图纸</th>
-        <th>材质</th>
-        <th>规格</th>
-        <th>数量</th>
-        <th>单位</th>
-        <th>重量</th>
-        <th>来源</th>
-        <th>操作</th>
-      </tr>
-      <% @bom.bom_items.order(level: :asc, part_number: :asc).each do |item| %>
-      <tr>
-        <td>L<%= item.level %></td>
-        <td><%= item.part_number %></td>
-        <td><%= item.part_name %></td>
-        <td><%= item.design_drawing&.name || '-' %></td>
-        <td><%= item.material || '-' %></td>
-        <td><%= item.specification || '-' %></td>
-        <td><%= item.quantity %></td>
-        <td><%= item.unit %></td>
-        <td><%= item.weight || '-' %></td>
-        <td><span class="badge badge-<%= item.source %>"><%= BomItem.sources[item.source.to_sym] %></span></td>
-        <td><%= link_to '删除', bom_delete_item_path(@bom, item), method: :delete, data: { confirm: '确认删除?' }, class: 'btn btn-danger btn-small' %></td>
-      </tr>
-      <% end %>
-    </table>
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-list-columns-reverse"></i> 物料清单</span>
+    <%= link_to '添加物料项', bom_add_item_path(@bom), class: 'btn btn-sm btn-primary' %>
   </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('.tree-expand').forEach(function(expand) {
-        expand.addEventListener('click', function() {
-          var parent = this.closest('.tree-item');
-          var children = parent.querySelector('.tree-children');
-          if (children) {
-            children.classList.toggle('expanded');
-            this.textContent = children.classList.contains('expanded') ? '[-]' : '[+]';
-          }
-        });
-      });
-    });
-  </script>
-</body>
-</html>
+  <div class="card-body p-0">
+    <% if @bom.bom_items.empty? %>
+      <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <div>暂无物料项</div>
+      </div>
+    <% else %>
+      <table class="table table-hover mb-0 align-middle">
+        <thead>
+          <tr>
+            <th>层级</th>
+            <th>物料编号</th>
+            <th>名称</th>
+            <th>图纸</th>
+            <th>材质</th>
+            <th>颜色</th>
+            <th>规格</th>
+            <th>数量</th>
+            <th>单位</th>
+            <th>重量</th>
+            <th>来源</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @bom.bom_items.order(level: :asc, part_number: :asc).each do |item| %>
+          <tr>
+            <td><span class="badge bg-light text-dark">L<%= item.level %></span></td>
+            <td><%= item.part_number %></td>
+            <td><%= item.part_name %></td>
+            <td><%= item.design_drawing&.name || '-' %></td>
+            <td><%= item.material || '-' %></td>
+            <td>
+              <% if item.color.present? %>
+                <% if item.color.hex_code.present? %>
+                  <span style="display: inline-block; width: 14px; height: 14px; background-color: <%= item.color.hex_code %>; border: 1px solid #ccc; border-radius: 3px; vertical-align: middle; margin-right: 4px;"></span>
+                <% end %>
+                <%= item.color.name %>
+                <span class="badge bg-info ms-1" style="font-size: 0.7rem;"><%= item.color.color_type_label %></span>
+              <% else %>
+                -
+              <% end %>
+            </td>
+            <td><%= item.specification || '-' %></td>
+            <td><%= item.quantity %></td>
+            <td><%= item.unit %></td>
+            <td><%= item.weight || '-' %></td>
+            <td><span class="badge badge-<%= item.source %>"><%= BomItem.sources[item.source.to_sym] %></span></td>
+            <td>
+              <%= button_to '删除', bom_delete_item_path(@bom, item), method: :delete, form: { class: 'd-inline' }, data: { turbo_confirm: '确认删除?' }, class: 'btn btn-sm btn-outline-danger' %>
+            </td>
+          </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+</div>

@@ -10,7 +10,7 @@ class ProductBom < ApplicationRecord
   validates :status, presence: true, inclusion: { in: ['draft', 'approved', 'released', 'archived'] }
 
   def self.statuses
-    { draft: 'draft', approved: 'approved', released: 'released', archived: 'archived' }
+    { 'draft' => '草稿', 'approved' => '已审批', 'released' => '已发布', 'archived' => '已归档' }
   end
 
   def total_items

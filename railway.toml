@@ -1,0 +1,28 @@
+# Railway 部署配置文件
+# 文档: https://docs.railway.app/config-as-code/reference
+
+# 后端 Rails API 服务
+[api]
+  name = "cad-version-api"
+  # 使用专门的生产环境 Gemfile（包含 pg gem）
+  buildCommand = "BUNDLE_GEMFILE=Gemfile.railway bundle install && BUNDLE_GEMFILE=Gemfile.railway bundle exec rails assets:precompile"
+  startCommand = "BUNDLE_GEMFILE=Gemfile.railway bundle exec puma -b tcp://0.0.0.0:$PORT -e production"
+
+[api.env]
+  RAILS_ENV = "production"
+  RAILS_LOG_TO_STDOUT = "true"
+  # 注意：以下变量需在 Railway Variables 中手动设置
+  # SECRET_KEY_BASE - 运行 `rails secret` 生成
+  # DATABASE_URL - Railway PostgreSQL 插件会自动注入
+
+# 前端 React/Vite 服务
+[frontend]
+  name = "cad-version-web"
+  rootDirectory = "mobile-web"
+  buildCommand = "npm install && npm run build"
+  startCommand = "npx serve dist -l $PORT"
+
+[frontend.env]
+  # 部署后需要将此值修改为后端服务的 Railway 域名
+  # 格式: https://your-api-domain.up.railway.app/api/v1
+  VITE_API_BASE_URL = ""

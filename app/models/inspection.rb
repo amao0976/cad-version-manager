@@ -1,0 +1,2 @@
+module Inspection
+end

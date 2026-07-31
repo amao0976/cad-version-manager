@@ -1,70 +1,80 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>材质管理</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .header h1 { display: inline; margin-right: 20px; }
-    .header .actions { float: right; }
-    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
-    .header .btn:hover { background: #0056b3; }
-    .header .btn-danger { background: #dc3545; }
-    .header .btn-danger:hover { background: #c82333; }
-    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background: #f8f9fa; }
-    .btn-small { padding: 4px 10px; font-size: 12px; }
-    .type-group { margin-bottom: 30px; }
-    .type-group h3 { color: #555; margin-top: 0; padding-bottom: 5px; border-bottom: 1px solid #eee; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>材质管理</h1>
-    <div class="actions">
-      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
-      <%= link_to '新建材质', new_material_path, class: 'btn' %>
+<% content_for :title, '材质管理' %>
+
+<div class="page-header">
+  <div>
+    <h1><i class="bi bi-gem"></i> 材质管理</h1>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-outline-secondary' %>
+    <%= link_to '新建材质', new_material_path, class: 'btn btn-primary' %>
+  </div>
+</div>
+
+<% if @materials.empty? %>
+  <div class="card">
+    <div class="card-body">
+      <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <div>暂无材质数据</div>
+      </div>
     </div>
   </div>
-
-  <% if @materials.empty? %>
-    <div class="card">
-      <h2>材质列表</h2>
-      <p>暂无材质数据</p>
-    </div>
-  <% else %>
-    <% @materials.group_by(&:kind).each do |type, materials| %>
-      <div class="card type-group">
-        <h3><%= case type when 'metal' then '金属' when 'gemstone' then '宝石' when 'other' then '其他' else type end %></h3>
-        <table>
-          <tr>
-            <th>名称</th>
-            <th>编码</th>
-            <th>单位</th>
-            <th>密度</th>
-            <th>当前价</th>
-            <th>操作</th>
-          </tr>
-          <% materials.each do |material| %>
-          <tr>
-            <td><%= link_to material.name, material_path(material) %></td>
-            <td><%= material.code %></td>
-            <td><%= material.unit %></td>
-            <td><%= material.density || '-' %></td>
-            <td><%= material.latest_price ? "#{material.latest_price.price_per_unit} #{material.latest_price.currency}" : '-' %></td>
-            <td>
-              <%= link_to '查看', material_path(material), class: 'btn btn-small' %>
-              <%= link_to '编辑', edit_material_path(material), class: 'btn btn-small' %>
-              <%= link_to '删除', material_path(material), method: :delete, data: { confirm: '确认删除?' }, class: 'btn btn-danger btn-small' %>
-            </td>
-          </tr>
+<% else %>
+  <% @materials.each do |type, materials| %>
+    <div class="card mb-4">
+      <div class="card-header">
+        <span>
+          <% if type == 'metal' %>
+            <i class="bi bi-braces"></i> 金属材质
+          <% elsif type == 'gemstone' %>
+            <i class="bi bi-gem"></i> 宝石材质
+          <% elsif type == 'other' %>
+            <i class="bi bi-circle"></i> 其他材质
+          <% else %>
+            <i class="bi bi-circle"></i> <%= type %>
           <% end %>
+        </span>
+        <span class="badge bg-primary"><%= materials.count %></span>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0 align-middle">
+          <thead>
+            <tr>
+              <th>名称</th>
+              <th>编码</th>
+              <th>单位</th>
+              <th>密度</th>
+              <th>当前价</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% materials.each do |material| %>
+            <tr>
+              <td><%= link_to material.name, material_path(material), class: 'fw-semibold' %></td>
+              <td><%= material.code %></td>
+              <td><%= material.unit %></td>
+              <td><%= material.density || '-' %></td>
+              <td>
+                <% price = material.current_price %>
+                <% if price %>
+                  <span class="badge bg-success"><%= price %></span>
+                <% else %>
+                  -
+                <% end %>
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <%= link_to '查看', material_path(material), class: 'btn btn-sm btn-outline-primary' %>
+                  <%= link_to '编辑', edit_material_path(material), class: 'btn btn-sm btn-outline-warning' %>
+                  <%= button_to '删除', material_path(material), method: :delete, form: { class: 'd-inline' }, data: { turbo_confirm: '确认删除?' }, class: 'btn btn-sm btn-outline-danger' %>
+                </div>
+              </td>
+            </tr>
+            <% end %>
+          </tbody>
         </table>
       </div>
-    <% end %>
+    </div>
   <% end %>
-</body>
-</html>
+<% end %>

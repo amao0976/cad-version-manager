@@ -1,6 +1,6 @@
-<div class="tree-item level-<%= bom_tree_item.level %>">
+<div class="tree-item level-<%= bom_tree_item.level %>" data-controller="toggle">
   <% if bom_tree_item.has_sub_items? %>
-    <span class="tree-expand">[+]</span>
+    <span class="tree-expand" data-action="click->toggle#toggle">[+]</span>
   <% else %>
     <span class="tree-indent"></span>
   <% end %>
@@ -17,11 +17,11 @@
       <% end %>
     </div>
     <div>
-      <%= link_to '删除', bom_delete_item_path(bom, bom_tree_item), method: :delete, data: { confirm: '确认删除?' }, class: 'btn btn-danger btn-small' %>
+      <%= button_to '删除', bom_delete_item_path(bom, bom_tree_item), method: :delete, form: { class: 'd-inline' }, data: { turbo_confirm: '确认删除?' }, class: 'btn btn-sm btn-danger' %>
     </div>
   </div>
   <% if bom_tree_item.has_sub_items? %>
-    <div class="tree-children">
+    <div class="tree-children" data-toggle-target="content">
       <%= render partial: 'bom_tree_item', collection: bom_tree_item.sub_items, locals: { bom: bom } %>
     </div>
   <% end %>

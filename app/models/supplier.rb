@@ -1,5 +1,8 @@
 class Supplier < ApplicationRecord
   has_many :bom_items, dependent: :nullify
+  has_many :factories, class_name: 'Inspection::Factory', foreign_key: :supplier_id
+  has_many :inspection_requests, class_name: 'Inspection::Request'
+  has_many :inspection_records, class_name: 'Inspection::Record'
 
   validates :name, presence: true, length: { maximum: 200 }
   validates :code, presence: true, length: { maximum: 50 }, uniqueness: true

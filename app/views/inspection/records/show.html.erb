@@ -1,0 +1,129 @@
+<% content_for :title, '验货记录详情' %>
+
+<div class="page-header mb-4">
+  <h1>验货记录: <%= @record.order_no %></h1>
+  <div class="d-flex gap-2 mt-2 flex-wrap">
+    <%= link_to '返回列表', inspection_records_path, class: 'btn btn-outline-secondary' %>
+    <%= link_to '编辑', edit_inspection_record_path(@record), class: 'btn btn-outline-primary' %>
+    <% unless @record.report %>
+      <%= link_to '创建报告', new_report_inspection_record_path(@record), class: 'btn btn-success' %>
+    <% else %>
+      <%= link_to '查看报告', inspection_record_report_path(@record, @record.report), class: 'btn btn-info' %>
+    <% end %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header fw-bold">基本信息</div>
+      <div class="card-body">
+        <p><strong>产品：</strong><%= @record.product&.name || '-' %></p>
+        <p><strong>订单号：</strong><%= @record.order_no %></p>
+        <p><strong>参考号：</strong><%= @record.reference_no %></p>
+        <p><strong>周数：</strong>第 <%= @record.week %> 周</p>
+        <p><strong>验货日期：</strong><%= l(@record.inspection_date, format: :long) %></p>
+        <p><strong>检验类型：</strong><%= @record.inspection_type || '-' %></p>
+        <p><strong>买家：</strong><%= @record.buyer || '-' %></p>
+        <p><strong>面料：</strong><%= @record.fabric_name || '-' %></p>
+        <p><strong>套装名称：</strong><%= @record.set_name || '-' %></p>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header fw-bold">供应商/工厂</div>
+      <div class="card-body">
+        <p><strong>供应商：</strong>
+          <% if @record.supplier %>
+            <%= link_to @record.supplier.name, supplier_path(@record.supplier) %>
+          <% else %>
+            <%= @record.supplier_name || '-' %>
+          <% end %>
+        </p>
+        <p><strong>供应商分类：</strong><%= @record.supplier_category || '-' %></p>
+        <p><strong>工厂：</strong><%= @record.factory_name || '-' %></p>
+        <p><strong>国家/地区：</strong><%= [@record.country, @record.province, @record.city].compact.join(' / ') || '-' %></p>
+        <% if @record.inspection_request %>
+          <p><strong>关联申请：</strong><%= link_to @record.inspection_request.order_number, inspection_request_path(@record.inspection_request) %></p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header fw-bold">检验结果</div>
+      <div class="card-body">
+        <div class="row text-center mb-3">
+          <div class="col">
+            <div class="fs-4 fw-bold"><%= @record.shipment_quantity %></div>
+            <small class="text-muted">出货数量</small>
+          </div>
+          <div class="col">
+            <div class="fs-4 fw-bold text-danger"><%= @record.major_defects %></div>
+            <small class="text-muted">主要缺陷</small>
+          </div>
+          <div class="col">
+            <div class="fs-4 fw-bold text-warning"><%= @record.minor_defects %></div>
+            <small class="text-muted">次要缺陷</small>
+          </div>
+          <div class="col">
+            <div class="fs-4 fw-bold"><%= @record.qty_rejected %></div>
+            <small class="text-muted">拒收数量</small>
+          </div>
+        </div>
+        <hr>
+        <p><strong>检验结果：</strong>
+          <% if @record.result == 'pass' %>
+            <span class="badge bg-success fs-6">合格</span>
+          <% elsif @record.result == 'fail' %>
+            <span class="badge bg-danger fs-6">不合格</span>
+          <% elsif @record.result == 'conditional' %>
+            <span class="badge bg-warning fs-6">有条件通过</span>
+          <% else %>
+            <span class="badge bg-secondary fs-6">未评定</span>
+          <% end %>
+        </p>
+        <p><strong>缺陷率：</strong><%= @record.defect_rate %>%</p>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header fw-bold">检验项目</div>
+      <div class="card-body">
+        <p><strong>RFID检查：</strong><%= @record.rfid_checking || '-' %></p>
+        <p><strong>化学测试：</strong><%= @record.chemical_test || '-' %></p>
+        <p><strong>物理测试：</strong><%= @record.physical_test || '-' %></p>
+        <p><strong>运输方式：</strong><%= @record.transport || '-' %></p>
+        <p><strong>验货员：</strong><%= @record.qc_name || '-' %></p>
+      </div>
+    </div>
+
+    <% if @record.report %>
+      <div class="card">
+        <div class="card-header fw-bold">验货报告</div>
+        <div class="card-body">
+          <p><strong>状态：</strong><span class="badge bg-info"><%= @report.status_label %></span></p>
+          <p><strong>款式描述：</strong><%= @report.style_description || '-' %></p>
+          <p><strong>颜色：</strong><%= @report.color || '-' %></p>
+          <p><strong>材质成分：</strong><%= @report.material_composition || '-' %></p>
+          <%= link_to '查看完整报告', inspection_record_report_path(@record), class: 'btn btn-primary btn-sm' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<% if @record.comments.present? %>
+  <div class="card mb-4">
+    <div class="card-header fw-bold">备注</div>
+    <div class="card-body"><%= simple_format(@record.comments) %></div>
+  </div>
+<% end %>
+
+<% if @record.ps_comments.present? %>
+  <div class="card">
+    <div class="card-header fw-bold">生产/采购部意见</div>
+    <div class="card-body"><%= simple_format(@record.ps_comments) %></div>
+  </div>
+<% end %>

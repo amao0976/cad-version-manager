@@ -2,8 +2,12 @@ source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.1.3"
-# Use sqlite3 as the database for Active Record
-gem "sqlite3"
+# Use the database for Active Record
+# sqlite3 for all platforms (development)
+gem "sqlite3", "~> 1.7"
+# pg for production deployment (Railway uses Linux)
+# Uncomment the following line and comment sqlite3 for production:
+# gem "pg", "~> 1.1"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
@@ -14,6 +18,9 @@ gem "bcrypt", "~> 3.1.7"
 
 # User authentication
 gem "devise"
+
+# JWT for API authentication
+gem "jwt"
 
 # Authorization
 gem "pundit"
@@ -28,6 +35,9 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "solid_cache"
 gem "solid_queue"
 gem "solid_cable"
+
+# CORS for API access
+gem "rack-cors"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
@@ -48,11 +58,38 @@ gem "stimulus-rails"
 # Importmap for JavaScript
 gem "importmap-rails"
 
+# Asset pipeline
+gem "propshaft"
+
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
 gem "rack-cors"
 
 # WebDAV client for uploading files to NAS (like UGREEN NAS)
 gem "webdav"
+
+# Spreadsheet handling
+gem "caxlsx"
+gem "roo", "~> 2.10"
+gem "csv"
+
+# PDF generation
+gem "prawn", "~> 2.5"
+gem "prawn-table", "~> 0.2"
+
+# State machine
+gem "aasm"
+
+# Pagination
+gem "pagy", "~> 9.4"
+
+# Markdown rendering for documentation
+gem "redcarpet"
+gem "rouge"
+gem "sanitize"
+
+# File upload with image processing
+gem "carrierwave"
+gem "mini_magick"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

@@ -1,0 +1,73 @@
+<% content_for :title, '技术文档管理' %>
+
+<div class="page-header mb-4">
+  <h1>技术文档管理</h1>
+  <div class="d-flex gap-2 mt-2">
+    <%= link_to 'PLM 仪表盘', plm_dashboard_path, class: 'btn btn-outline-secondary' %>
+    <% if current_user.admin? || current_user.engineer? %>
+      <%= link_to '新建文档', new_document_path, class: 'btn btn-primary' %>
+    <% end %>
+  </div>
+</div>
+
+<!-- 筛选 -->
+<div class="card mb-3">
+  <div class="card-body">
+    <%= form_with url: documents_path, method: :get, class: 'row g-2 align-items-end' do |f| %>
+      <div class="col-auto">
+        <label class="form-label small">文档类型</label>
+        <%= select_tag :doc_type, options_for_select(Document.doc_types.map { |k, v| [k, v] }, params[:doc_type]), include_blank: '全部', class: 'form-select form-select-sm' %>
+      </div>
+      <div class="col-auto">
+        <label class="form-label small">状态</label>
+        <%= select_tag :status, options_for_select(Document.statuses.map { |k, v| [k, v] }, params[:status]), include_blank: '全部', class: 'form-select form-select-sm' %>
+      </div>
+      <div class="col-auto">
+        <%= f.submit '筛选', class: 'btn btn-sm btn-outline-primary' %>
+        <%= link_to '重置', documents_path, class: 'btn btn-sm btn-outline-secondary' %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- 文档列表 -->
+<div class="card">
+  <div class="card-body">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>文档编号</th>
+          <th>标题</th>
+          <th>类型</th>
+          <th>关联产品</th>
+          <th>当前版本</th>
+          <th>状态</th>
+          <th>更新时间</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @documents.each do |doc| %>
+          <tr>
+            <td><%= doc.doc_number %></td>
+            <td><%= link_to doc.title, document_path(doc) %></td>
+            <td><span class="badge bg-secondary"><%= doc.doc_type_label %></span></td>
+            <td><%= doc.product&.name || '-' %></td>
+            <td><%= doc.current_version %></td>
+            <td><span class="badge bg-<%= doc.status == 'released' ? 'success' : 'secondary' %>"><%= doc.status_label %></span></td>
+            <td><%= l(doc.updated_at, format: :short) if doc.updated_at %></td>
+            <td>
+              <%= link_to '查看', document_path(doc), class: 'btn btn-sm btn-outline-primary' %>
+              <% if current_user.admin? || current_user.engineer? %>
+                <%= link_to '编辑', edit_document_path(doc), class: 'btn btn-sm btn-outline-secondary' %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @documents.empty? %>
+      <p class="text-muted text-center">暂无文档</p>
+    <% end %>
+  </div>
+</div>

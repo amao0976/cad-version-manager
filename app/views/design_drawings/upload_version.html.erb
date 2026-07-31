@@ -1,68 +1,83 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>上传图纸版本</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .header h1 { display: inline; margin-right: 20px; }
-    .header .actions { float: right; }
-    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
-    .header .btn:hover { background: #0056b3; }
-    .header .btn-danger { background: #dc3545; }
-    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-    .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-    .form-group textarea { height: 100px; }
-    .actions { margin-top: 20px; }
-    .btn { padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border: none; border-radius: 5px; cursor: pointer; }
-    .btn:hover { background: #0056b3; }
-    .btn-danger { background: #dc3545; }
-    .btn-danger:hover { background: #c82333; }
-    .error { color: #dc3545; margin-top: 10px; }
-    .file-types { margin-top: 5px; font-size: 12px; color: #666; }
-    .info-box { background: #e7f3ff; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-    .info-label { font-weight: bold; color: #004085; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>上传图纸版本</h1>
-    <div class="actions">
-      <%= link_to '返回图纸详情', design_drawing_path(@drawing), class: 'btn btn-danger' %>
+<% content_for :title, '上传图纸版本' %>
+
+<div class="page-header">
+  <div>
+    <h1><i class="bi bi-upload"></i> 上传图纸版本</h1>
+    <div class="text-muted mt-1">
+      <code><%= @drawing.display_drawing_code %></code>
+      <span class="mx-2">·</span>
+      <span><%= @drawing.name %></span>
     </div>
   </div>
+  <div class="d-flex gap-2">
+    <%= link_to '返回图纸详情', design_drawing_path(@drawing), class: 'btn btn-outline-secondary' %>
+  </div>
+</div>
 
-  <div class="card">
-    <div class="info-box">
-      <div><span class="info-label">图纸名称:</span> <%= @drawing.name %></div>
-      <div><span class="info-label">所属项目:</span> <%= @drawing.design_project&.name %></div>
-      <div><span class="info-label">当前版本:</span> <%= @drawing.latest_version&.version_number || '无' %></div>
-      <div><span class="info-label">版本总数:</span> <%= @drawing.drawing_versions.count %></div>
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="stat-card" style="--stat-from: #64748b; --stat-to: #475569;">
+      <div class="stat-number"><%= @drawing.drawing_versions.count %></div>
+      <div class="stat-label">版本总数</div>
+      <i class="bi bi-stack stat-icon"></i>
     </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card" style="--stat-from: #10b981; --stat-to: #059669;">
+      <div class="stat-number"><%= @drawing.latest_formal ? "V#{@drawing.latest_formal.version_label}" : '-' %></div>
+      <div class="stat-label">最新正式版</div>
+      <i class="bi bi-patch-check stat-icon"></i>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card" style="--stat-from: #f59e0b; --stat-to: #d97706;">
+      <div class="stat-number"><%= @drawing.latest_draft ? @drawing.latest_draft.version_label : '-' %></div>
+      <div class="stat-label">最新草稿版</div>
+      <i class="bi bi-pencil-square stat-icon"></i>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card" style="--stat-from: #3b82f6; --stat-to: #1d4ed8;">
+      <div class="stat-number"><%= @drawing.design_project&.name || '-' %></div>
+      <div class="stat-label">所属项目</div>
+      <i class="bi bi-folder stat-icon"></i>
+    </div>
+  </div>
+</div>
 
-    <h2>上传新版本</h2>
+<div class="card">
+  <div class="card-header"><i class="bi bi-cloud-upload"></i> 上传新版本</div>
+  <div class="card-body">
     <% if flash[:alert] %>
-      <div class="error"><%= flash[:alert] %></div>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i> <%= flash[:alert] %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
     <% end %>
-    <%= form_tag design_drawing_create_version_path(@drawing), method: :post, html: { multipart: true } do %>
-      <div class="form-group">
-        <%= label_tag :file, '选择图纸文件' %>
-        <%= file_field_tag :file %>
-        <div class="file-types">支持格式: .prt, .asm, .dft, .dwg, .step, .iges, .stl</div>
-        <div class="file-types">文件将按以下结构存储: <strong>项目名/图纸名/v版本号/文件名_v版本号.扩展名</strong></div>
-      </div>
-      <div class="form-group">
-        <%= label_tag :change_log, '变更日志' %>
-        <%= text_area_tag :change_log, placeholder: '描述本次版本变更内容...' %>
-      </div>
-      <div class="actions">
-        <%= submit_tag '上传版本', class: 'btn' %>
-        <%= link_to '取消', design_drawing_path(@drawing), class: 'btn btn-danger' %>
+
+    <%= form_with(url: design_drawing_create_version_path(@drawing), method: :post, multipart: true) do |f| %>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">版本类型</label>
+          <%= select_tag :version_type, options_for_select([['草稿版本 (00, 01, 02...)', 'draft'], ['正式版本 (A, B, C...)', 'formal']], 'draft'), class: 'form-select' %>
+          <div class="form-text">草稿版本用于迭代设计，正式版本用于发布归档</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">选择图纸文件</label>
+          <%= f.file_field :file, class: 'form-control' %>
+          <div class="form-text">支持格式: .prt, .asm, .dft, .dwg, .step, .iges, .stl</div>
+        </div>
+        <div class="col-12">
+          <label class="form-label">变更日志</label>
+          <%= f.text_area :change_log, placeholder: '描述本次版本变更内容...', class: 'form-control', rows: 3 %>
+        </div>
+        <div class="col-12">
+          <div class="d-flex gap-2">
+            <%= f.submit '上传版本', class: 'btn btn-primary' %>
+            <%= link_to '取消', design_drawing_path(@drawing), class: 'btn btn-outline-secondary' %>
+          </div>
+        </div>
       </div>
     <% end %>
   </div>
-</body>
-</html>
+</div>

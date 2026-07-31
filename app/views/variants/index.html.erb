@@ -1,83 +1,56 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title><%= @product.name %> - 变体列表</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    .header { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .header h1 { display: inline; margin-right: 20px; }
-    .header .actions { float: right; }
-    .header .btn { padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px; }
-    .header .btn:hover { background: #0056b3; }
-    .header .btn-danger { background: #dc3545; }
-    .header .btn-danger:hover { background: #c82333; }
-    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .card h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background: #f8f9fa; }
-    .status-active { color: #28a745; font-weight: bold; }
-    .status-inactive { color: #6c757d; font-weight: bold; }
-    .btn-small { padding: 4px 10px; font-size: 12px; }
-    .product-info { margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; }
-    .product-info span { font-weight: bold; color: #007bff; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1><%= @product.name %> - 变体列表</h1>
-    <div class="actions">
-      <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
-      <%= link_to '返回产品', product_path(@product), class: 'btn' %>
-      <%= link_to '新建变体', new_product_variant_path(@product), class: 'btn' %>
-    </div>
-  </div>
+<% content_for :title, "#{@product.name} - 变体列表" %>
 
-  <div class="card">
-    <h2>变体列表</h2>
-    <div class="product-info">
-      产品：<span><%= @product.name %></span> | 
-      编码：<span><%= @product.product_code %></span> | 
-      主材质：<span><%= @product.main_material&.name || '-' %></span>
-    </div>
-    <% if @variants.empty? %>
-      <p>暂无变体数据</p>
-    <% else %>
-      <table>
-        <tr>
-          <th>SKU编码</th>
-          <th>材质</th>
-          <th>尺寸</th>
-          <th>颜色</th>
-          <th>宝石</th>
-          <th>重量</th>
-          <th>状态</th>
-          <th>操作</th>
-        </tr>
-        <% @variants.each do |variant| %>
-        <tr>
-          <td><%= link_to variant.sku_code, product_variant_path(@product, variant) %></td>
-          <td><%= variant.material&.name || '-' %></td>
-          <td><%= variant.size || '-' %></td>
-          <td><%= variant.color || '-' %></td>
-          <td><%= variant.gemstone || '-' %></td>
-          <td><%= variant.weight ? "#{variant.weight}g" : '-' %></td>
-          <td><span class="status-<%= variant.status %>"><%= case variant.status when 'active' then '启用' when 'inactive' then '停用' end %></span></td>
-          <td>
-            <%= link_to '查看', product_variant_path(@product, variant), class: 'btn btn-small' %>
-            <%= link_to '编辑', edit_product_variant_path(@product, variant), class: 'btn btn-small' %>
-            <% if variant.status == 'inactive' %>
-              <%= link_to '启用', variant_activate_path(variant), method: :post, class: 'btn btn-small' %>
-            <% end %>
-            <% if variant.status == 'active' %>
-              <%= link_to '停用', variant_deactivate_path(variant), method: :post, class: 'btn btn-small' %>
-            <% end %>
-            <%= link_to '删除', product_variant_path(@product, variant), method: :delete, data: { confirm: '确认删除?' }, class: 'btn btn-danger btn-small' %>
-          </td>
-        </tr>
-        <% end %>
-      </table>
-    <% end %>
+<div class="page-header">
+  <h1><%= @product.name %> - 变体列表</h1>
+  <div class="d-flex gap-2 mb-3">
+    <%= link_to '返回仪表盘', dashboard_path, class: 'btn btn-danger' %>
+    <%= link_to '返回产品', product_path(@product), class: 'btn btn-outline-secondary' %>
+    <%= link_to '新建变体', new_product_variant_path(@product), class: 'btn btn-outline-secondary' %>
   </div>
-</body>
-</html>
+</div>
+
+<div class="card">
+  <div class="card-header fw-bold">变体列表</div>
+  <div class="product-info">
+    产品：<span><%= @product.name %></span> | 
+    编码：<span><%= @product.product_code %></span>
+  </div>
+  <% if @variants.empty? %>
+    <p>暂无变体数据</p>
+  <% else %>
+    <table class="table table-hover align-middle">
+      <tr>
+        <th>SKU编码</th>
+        <th>材质</th>
+        <th>尺寸</th>
+        <th>颜色</th>
+        <th>宝石</th>
+        <th>重量</th>
+        <th>状态</th>
+        <th>操作</th>
+      </tr>
+      <% @variants.each do |variant| %>
+      <tr>
+        <td><%= link_to variant.sku_code, product_variant_path(@product, variant) %></td>
+        <td><%= variant.material&.name || '-' %></td>
+        <td><%= variant.size || '-' %></td>
+        <td><%= variant.color || '-' %></td>
+        <td><%= variant.gemstone || '-' %></td>
+        <td><%= variant.weight ? "#{variant.weight}g" : '-' %></td>
+        <td><span class="status-<%= variant.status %>"><%= case variant.status when 'active' then '启用' when 'inactive' then '停用' end %></span></td>
+        <td>
+          <%= link_to '查看', product_variant_path(@product, variant), class: 'btn btn-sm' %>
+          <%= link_to '编辑', edit_product_variant_path(@product, variant), class: 'btn btn-sm' %>
+          <% if variant.status == 'inactive' %>
+            <%= link_to '启用', variant_activate_path(variant), method: :post, class: 'btn btn-sm' %>
+          <% end %>
+          <% if variant.status == 'active' %>
+            <%= link_to '停用', variant_deactivate_path(variant), method: :post, class: 'btn btn-sm' %>
+          <% end %>
+          <%= button_to '删除', product_variant_path(@product, variant), method: :delete, form: { class: 'd-inline' }, data: { turbo_confirm: '确认删除?' }, class: 'btn btn-sm btn-danger' %>
+        </td>
+      </tr>
+      <% end %>
+    </table>
+  <% end %>
+</div>

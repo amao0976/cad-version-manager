@@ -1,0 +1,33 @@
+<% sid = local_assigns[:section_id] || "img_#{title.parameterize}" %>
+<div class="card mb-3" id="<%= sid %>_section">
+  <div class="card-header fw-bold"><%= title %></div>
+  <div class="card-body">
+    <div class="image-gallery" id="<%= sid %>_gallery" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+      <% existing_images.each do |img| %>
+        <div class="image-thumb-wrapper" style="position: relative; display: inline-block;">
+          <%= image_tag img, style: 'width: 120px; height: 90px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border);' %>
+          <% if editable %>
+            <%= form_tag remove_image_inspection_record_report_path(report.inspection_record, attachment_id: img.id), method: :delete, style: 'position: absolute; top: -6px; right: -6px;' do %>
+              <button type="submit" class="btn btn-sm btn-danger" style="border-radius: 50%; width: 20px; height: 20px; padding: 0; font-size: 12px; line-height: 1;">&times;</button>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    <% if editable %>
+      <div class="drop-zone" id="<%= sid %>_dropzone"
+           style="border: 2px dashed var(--border); border-radius: 8px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s;"
+           ondragover="handleDragOver(event, '<%= sid %>_dropzone')"
+           ondragleave="handleDragLeave(event, '<%= sid %>_dropzone')"
+           ondrop="handleDrop(event, '<%= sid %>_dropzone', '<%= sid %>_input')">
+        <div style="font-size: 2rem; color: var(--muted);">+</div>
+        <div><%= t("inspection_reports.drag_or_click") %></div>
+        <div style="font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem;"><%= t("inspection_reports.drop_hint") %></div>
+        <%= file_field_tag field_name, id: "#{sid}_input", multiple: true, accept: "image/*", style: "display:none;", onchange: "previewFiles(this, '#{sid}')" %>
+        <button type="button" class="btn btn-sm btn-outline-secondary" style="margin-top: 0.5rem;" onclick="document.getElementById('<%= sid %>_input').click()">
+          <%= t("inspection_reports.select_photos") %>
+        </button>
+      </div>
+    <% end %>
+  </div>
+</div>

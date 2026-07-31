@@ -1,23 +1,190 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><%= yield(:title) || 'CAD 设计图纸版本管理系统' %></title>
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <%= stylesheet_link_tag "application", media: "all" %>
   <%= javascript_importmap_tags %>
+  <%= javascript_include_tag "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js", nonce: true, "data-turbo-track": "reload", defer: true %>
+  <script>
+  // ===== Lightbox - 点击图片悬浮放大 =====
+  var lb_overlay = null;
+
+  function lb_init() {
+    if (lb_overlay) return;
+    lb_overlay = document.createElement('div');
+    lb_overlay.className = 'custom-lightbox';
+    lb_overlay.innerHTML =
+      '<div class="lightbox-container">' +
+        '<div class="lightbox-header">' +
+          '<span class="lightbox-title"></span>' +
+          '<button type="button" class="lightbox-close" aria-label="关闭">&times;</button>' +
+        '</div>' +
+        '<div class="lightbox-body">' +
+          '<img class="lightbox-img" src="" alt="">' +
+          '<div class="lightbox-caption"></div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(lb_overlay);
+
+    lb_overlay.addEventListener('click', function(e) {
+      if (e.target === lb_overlay) lb_close();
+    });
+    lb_overlay.querySelector('.lightbox-close').addEventListener('click', lb_close);
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && lb_overlay.classList.contains('show')) lb_close();
+    });
+  }
+
+  function lb_open(src, title, caption) {
+    lb_init();
+    lb_overlay.querySelector('.lightbox-img').src = src;
+    lb_overlay.querySelector('.lightbox-img').alt = title || '';
+    lb_overlay.querySelector('.lightbox-title').textContent = title || '';
+    var cap = lb_overlay.querySelector('.lightbox-caption');
+    if (caption) { cap.textContent = caption; cap.style.display = 'block'; }
+    else { cap.style.display = 'none'; }
+    lb_overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function lb_close() {
+    if (!lb_overlay) return;
+    lb_overlay.classList.remove('show');
+    lb_overlay.querySelector('.lightbox-img').src = '';
+    document.body.style.overflow = '';
+  }
+
+  // 全局点击事件委托 - 在捕获阶段拦截
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest('a.product-thumb, a[data-bs-toggle="lightbox"]');
+    if (link) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      var href = link.getAttribute('href');
+      var title = link.dataset.bsTitle || link.dataset.title || '';
+      var innerImg = link.querySelector('img');
+      if (!title && innerImg) title = innerImg.alt || '';
+      if (href) lb_open(href, title);
+      return false;
+    }
+
+    var galleryImg = e.target.closest('.gallery-item img, .product-thumb-img');
+    if (galleryImg && galleryImg.dataset.full) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      lb_open(galleryImg.dataset.full, galleryImg.alt || '');
+      return false;
+    }
+  }, true);
+
+  // Turbolinks 加载后重新绑定
+  document.addEventListener('turbo:load', function() {
+    // 确保事件监听器已绑定（全局只需一次）
+  });
+  </script>
 </head>
 <body>
-  <% if notice %>
-    <div style="background: #d4edda; color: #155724; padding: 10px 20px; margin: 10px 0; border-radius: 5px;">
-      <%= notice %>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm">
+    <div class="container-fluid">
+      <%= link_to dashboard_path, class: 'navbar-brand d-flex align-items-center gap-2' do %>
+        <i class="bi bi-box-seam-fill"></i>
+        <strong>CAD 管理系统</strong>
+      <% end %>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><%= link_to '仪表盘', dashboard_path, class: 'nav-link' %></li>
+          <li class="nav-item"><%= link_to '项目', design_projects_path, class: 'nav-link' %></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">产品</a>
+            <ul class="dropdown-menu">
+              <%= link_to '产品列表', products_path, class: 'dropdown-item' %>
+              <%= link_to '分类管理', categories_path, class: 'dropdown-item' %>
+              <%= link_to '物料管理', materials_path, class: 'dropdown-item' %>
+              <%= link_to '图纸管理', design_drawings_path, class: 'dropdown-item' %>
+              <li><hr class="dropdown-divider"></li>
+              <%= link_to '颜色管理', colors_path, class: 'dropdown-item' %>
+            </ul>
+          </li>
+          <li class="nav-item"><%= link_to 'BOM', boms_path, class: 'nav-link' %></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">验货</a>
+            <ul class="dropdown-menu">
+              <%= link_to '验货申请', inspection_requests_path, class: 'dropdown-item' %>
+              <%= link_to '验货记录', inspection_records_path, class: 'dropdown-item' %>
+              <%= link_to '验货报告', inspection_reports_path, class: 'dropdown-item' %>
+            </ul>
+          </li>
+          <li class="nav-item"><%= link_to 'PLM', plm_dashboard_path, class: 'nav-link' %></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">供应商</a>
+            <ul class="dropdown-menu">
+              <%= link_to '供应商列表', suppliers_path, class: 'dropdown-item' %>
+              <%= link_to '工厂管理', factories_path, class: 'dropdown-item' %>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">帮助</a>
+            <ul class="dropdown-menu">
+              <%= link_to '帮助中心', guides_path, class: 'dropdown-item' %>
+              <% if user_signed_in? && (current_user.admin? || current_user.manager?) %>
+                <%= link_to '文档管理', admin_guides_path, class: 'dropdown-item' %>
+                <%= link_to '分类管理', guide_categories_path, class: 'dropdown-item' %>
+              <% end %>
+            </ul>
+          </li>
+          <% if user_signed_in? && current_user.admin? %>
+            <li class="nav-item"><%= link_to '用户管理', admin_users_path, class: 'nav-link' %></li>
+          <% end %>
+        </ul>
+        <ul class="navbar-nav">
+          <% if user_signed_in? %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="bi bi-person-circle"></i> <%= current_user.email %>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <%= link_to '退出登录', destroy_user_session_path, data: { turbo: false }, class: 'dropdown-item text-danger' %>
+              </ul>
+            </li>
+          <% else %>
+            <li class="nav-item"><%= link_to '登录', new_user_session_path, class: 'nav-link' %></li>
+          <% end %>
+        </ul>
+      </div>
     </div>
-  <% end %>
-  <% if alert %>
-    <div style="background: #f8d7da; color: #721c24; padding: 10px 20px; margin: 10px 0; border-radius: 5px;">
-      <%= alert %>
+  </nav>
+
+  <main class="main-content">
+    <div class="container-fluid py-4">
+      <% if notice %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <i class="bi bi-check-circle-fill"></i> <%= notice %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      <% end %>
+      <% if alert %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <i class="bi bi-exclamation-triangle-fill"></i> <%= alert %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      <% end %>
+      <%= yield %>
     </div>
-  <% end %>
-  <%= yield %>
+  </main>
+
 </body>
 </html>

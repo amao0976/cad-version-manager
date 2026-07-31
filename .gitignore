@@ -27,3 +27,11 @@
 /tmp/storage/*
 !/tmp/storage/
 !/tmp/storage/.keep
+
+# Ignore mobile-web build artifacts
+/mobile-web/dist/
+/mobile-web/.expo/
+
+# Ignore node_modules
+/node_modules/
+/mobile-web/node_modules/

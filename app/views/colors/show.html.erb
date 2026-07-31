@@ -1,0 +1,91 @@
+<% content_for :title, @color.name %>
+
+<div class="page-header">
+  <h1><%= @color.name %></h1>
+  <div class="d-flex gap-2">
+    <%= link_to '返回列表', colors_path, class: 'btn btn-outline-secondary' %>
+    <% if current_user.admin? %>
+      <%= link_to '编辑', edit_color_path(@color), class: 'btn btn-outline-primary' %>
+    <% end %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header fw-bold">颜色详情</div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-4">
+        <% if @color.hex_code.present? %>
+          <div style="background-color: <%= @color.hex_code %>; width: 100%; height: 200px; border-radius: 8px; border: 1px solid #ccc;"></div>
+          <p class="text-center mt-2"><code><%= @color.hex_code %></code></p>
+        <% end %>
+      </div>
+      <div class="col-md-8">
+        <table class="table">
+          <tr>
+            <th>颜色名称</th>
+            <td><%= @color.name %></td>
+          </tr>
+          <tr>
+            <th>颜色编码</th>
+            <td><code><%= @color.code %></code></td>
+          </tr>
+          <tr>
+            <th>颜色类型</th>
+            <td><span class="badge bg-info"><%= @color.color_type_label %></span></td>
+          </tr>
+          <tr>
+            <th>状态</th>
+            <td>
+              <% if @color.active? %>
+                <span class="badge bg-success">启用</span>
+              <% else %>
+                <span class="badge bg-secondary">停用</span>
+              <% end %>
+            </td>
+          </tr>
+          <tr>
+            <th>使用的产品数</th>
+            <td><%= @color.products.count %></td>
+          </tr>
+          <tr>
+            <th>创建时间</th>
+            <td><%= @color.created_at.strftime('%Y-%m-%d %H:%M') %></td>
+          </tr>
+          <% if @color.description.present? %>
+            <tr>
+              <th>描述</th>
+              <td><%= @color.description %></td>
+            </tr>
+          <% end %>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if @color.products.any? %>
+  <div class="card mt-4">
+    <div class="card-header fw-bold">使用此颜色的产品</div>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>产品编码</th>
+          <th>产品名称</th>
+          <th>分类</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @color.products.each do |product| %>
+          <tr>
+            <td><code><%= product.product_code %></code></td>
+            <td><%= product.name %></td>
+            <td><%= product.category&.name %></td>
+            <td><%= link_to '查看', product_path(product), class: 'btn btn-sm' %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

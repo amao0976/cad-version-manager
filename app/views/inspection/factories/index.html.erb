@@ -1,0 +1,66 @@
+<% content_for :title, '工厂管理' %>
+
+<div class="page-header mb-4">
+  <h1>工厂管理</h1>
+</div>
+
+<!-- 新建工厂 -->
+<div class="card mb-4">
+  <div class="card-header fw-bold">添加新工厂</div>
+  <div class="card-body">
+    <%= form_with url: factories_path, method: :post, class: 'row g-2 align-items-end' do |f| %>
+      <div class="col-md-3">
+        <label class="form-label small">供应商</label>
+        <%= select_tag 'factory[supplier_id]', options_from_collection_for_select(Supplier.order(:name), :id, :name, @supplier&.id), include_blank: '请选择', class: 'form-select', required: true %>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small">工厂名称</label>
+        <%= text_field_tag 'factory[name]', nil, class: 'form-control', required: true %>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">国家</label>
+        <%= text_field_tag 'factory[country]', nil, class: 'form-control' %>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">省份</label>
+        <%= text_field_tag 'factory[province]', nil, class: 'form-control' %>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">城市</label>
+        <%= text_field_tag 'factory[city]', nil, class: 'form-control' %>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary">添加工厂</button>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- 工厂列表 -->
+<div class="card">
+  <div class="card-body table-responsive-wrap">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>工厂名称</th>
+          <th>所属供应商</th>
+          <th>位置</th>
+          <th>备注</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @factories.each do |factory| %>
+          <tr>
+            <td><%= factory.name %></td>
+            <td><%= factory.supplier.name %></td>
+            <td><%= factory.location %></td>
+            <td><%= factory.remarks %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @factories.empty? %>
+      <p class="text-muted text-center">暂无工厂记录</p>
+    <% end %>
+  </div>
+</div>

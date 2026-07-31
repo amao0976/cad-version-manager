@@ -1,0 +1,230 @@
+<div class="card mb-3">
+  <div class="card-header fw-bold">尺寸检验表</div>
+  <div class="card-body">
+    <% initial_data = report.size_table_normalized %>
+    <input type="hidden" name="inspection_report[size_table_json]" id="size_table_json" value="<%= initial_data.to_json.gsub('"', '&quot;').html_safe %>">
+
+    <div style="display:flex; gap:0.5rem; margin-bottom:0.75rem; align-items:center; flex-wrap:wrap;">
+      <label class="form-label" style="margin:0;">模板：</label>
+      <select id="size_table_template" class="form-select form-select-sm" style="width:auto;" onchange="selectTemplate(this.value)">
+        <option value="">-- 选择模板 --</option>
+        <% Inspection::Report.template_list.each do |tmpl| %>
+          <option value="<%= tmpl[:key] %>"><%= tmpl[:name] %></option>
+        <% end %>
+      </select>
+      <button type="button" class="btn btn-sm btn-outline-primary" onclick="confirmApplyTemplate()" id="apply_template_btn" style="display:none;">
+        应用模板
+      </button>
+      <span>|</span>
+      <label class="btn btn-sm btn-outline-secondary" style="cursor:pointer;">
+        上传模板
+        <input type="file" accept=".xlsx,.xls,.csv" style="display:none;" onchange="uploadTemplateFile(this)">
+      </label>
+      <%= link_to '下载样本', download_size_template_sample_inspection_record_report_path(report.inspection_record), class: 'btn btn-sm btn-outline-secondary' %>
+    </div>
+
+    <div style="overflow-x: auto;">
+      <table class="table table-bordered" id="size_table_container">
+        <thead><tr><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
+      <button type="button" class="btn btn-sm btn-outline-primary" onclick="addSizeColumn()">添加尺码列</button>
+      <button type="button" class="btn btn-sm btn-outline-primary" onclick="addSizeRow()">添加测量行</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var sizeTableData = <%= initial_data.to_json.html_safe %>;
+var templateData = <%= Inspection::Report.size_table_templates.to_json.html_safe %>;
+var selectedTemplateKey = null;
+
+(function() {
+  sizeTableData.rows.forEach(function(row) {
+    if (Array.isArray(row.values)) {
+      var newValues = {};
+      sizeTableData.columns.forEach(function(col, idx) {
+        newValues[col] = { nominal: (row.values[idx] || '').toString(), actual: '' };
+      });
+      row.values = newValues;
+      if (!row.tolerance) row.tolerance = '';
+    }
+  });
+})();
+
+var mpLabel = '测量点';
+var tolLabel = '公差';
+var nomLabel = '标称';
+var actLabel = '实测';
+var resLabel = '结果';
+var removeLabel = '删除';
+
+function computeResult(nominal, actual, tolerance) {
+  if (!nominal || !actual) return null;
+  var nom = parseFloat(nominal);
+  var act = parseFloat(actual);
+  var tol = parseFloat(tolerance) || 0;
+  if (isNaN(nom) || isNaN(act)) return null;
+  return Math.abs(act - nom) <= tol ? 'pass' : 'fail';
+}
+
+function renderSizeTable() {
+  var container = document.getElementById("size_table_container");
+  var html = '<thead>';
+
+  html += '<tr>';
+  html += '<th rowspan="2">' + mpLabel + '</th>';
+  html += '<th rowspan="2">' + tolLabel + '</th>';
+  for (var c = 0; c < sizeTableData.columns.length; c++) {
+    html += '<th colspan="3"><span>' + escapeHtml(sizeTableData.columns[c]) + '</span>';
+    html += ' <button type="button" class="btn btn-sm btn-link text-danger size-col-remove" onclick="removeSizeColumn(' + c + ')">&times;</button></th>';
+  }
+  html += '</tr>';
+
+  html += '<tr>';
+  for (var c = 0; c < sizeTableData.columns.length; c++) {
+    html += '<th>' + nomLabel + '</th>';
+    html += '<th>' + actLabel + '</th>';
+    html += '<th>' + resLabel + '</th>';
+  }
+  html += '</tr></thead>';
+
+  html += '<tbody>';
+  for (var r = 0; r < sizeTableData.rows.length; r++) {
+    var row = sizeTableData.rows[r];
+    html += '<tr>';
+    html += '<td><input type="text" class="form-control form-control-sm size-measure-input" value="' + escapeHtml(row.measurement_point) + '" onchange="updateRowField(' + r + ',\'measurement_point\',this.value)"></td>';
+    html += '<td><input type="text" class="form-control form-control-sm size-tolerance-input" value="' + escapeHtml(row.tolerance || '') + '" onchange="updateRowField(' + r + ',\'tolerance\',this.value)"></td>';
+
+    for (var c = 0; c < sizeTableData.columns.length; c++) {
+      var col = sizeTableData.columns[c];
+      var vals = (row.values && row.values[col]) || { nominal: '', actual: '' };
+      var result = computeResult(vals.nominal, vals.actual, row.tolerance);
+      var resultClass = result === 'pass' ? 'table-success' : result === 'fail' ? 'table-danger' : '';
+      var resultSymbol = result === 'pass' ? '&#10003;' : result === 'fail' ? '&#10007;' : '';
+
+      html += '<td><input type="text" class="form-control form-control-sm size-value-input" value="' + escapeHtml(vals.nominal) + '" onchange="updateCellValue(' + r + ',\'' + escapeHtml(col) + '\',\'nominal\',this.value)"></td>';
+      html += '<td><input type="text" class="form-control form-control-sm size-value-input" value="' + escapeHtml(vals.actual) + '" onchange="updateCellValue(' + r + ',\'' + escapeHtml(col) + '\',\'actual\',this.value)"></td>';
+      html += '<td class="' + resultClass + '" style="text-align:center; font-weight:bold;">' + resultSymbol + '</td>';
+    }
+    html += '<td><button type="button" class="btn btn-sm btn-outline-danger size-row-remove" onclick="removeSizeRow(' + r + ')">' + removeLabel + '</button></td>';
+    html += '</tr>';
+  }
+  html += '</tbody>';
+  container.innerHTML = html;
+  document.getElementById('size_table_json').value = JSON.stringify(sizeTableData);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function selectTemplate(key) {
+  selectedTemplateKey = key;
+  document.getElementById('apply_template_btn').style.display = key ? 'inline-block' : 'none';
+}
+
+function confirmApplyTemplate() {
+  if (!selectedTemplateKey) return;
+  var tmpl = templateData[selectedTemplateKey];
+  if (!tmpl) return;
+
+  if (sizeTableData.rows.length > 0) {
+    if (!confirm('应用模板将覆盖现有数据，确定继续？')) return;
+  }
+
+  var columns = sizeTableData.columns.length > 0 ? sizeTableData.columns : ['S','M','L','XL'];
+
+  sizeTableData.rows = tmpl.measurement_points.map(function(mp) {
+    var values = {};
+    columns.forEach(function(col) { values[col] = { nominal: '', actual: '' }; });
+    return { measurement_point: mp.measurement_point, tolerance: mp.tolerance, values: values };
+  });
+  sizeTableData.columns = columns;
+
+  renderSizeTable();
+  document.getElementById('size_table_template').value = '';
+  document.getElementById('apply_template_btn').style.display = 'none';
+  selectedTemplateKey = null;
+}
+
+function addSizeColumn() {
+  var name = prompt('请输入尺码名称（如 S、M、L、XL）：');
+  if (!name) return;
+  sizeTableData.columns.push(name);
+  sizeTableData.rows.forEach(function(row) {
+    if (!row.values) row.values = {};
+    row.values[name] = { nominal: '', actual: '' };
+  });
+  renderSizeTable();
+}
+
+function removeSizeColumn(index) {
+  var colName = sizeTableData.columns[index];
+  sizeTableData.columns.splice(index, 1);
+  sizeTableData.rows.forEach(function(row) {
+    if (row.values && row.values[colName]) delete row.values[colName];
+  });
+  renderSizeTable();
+}
+
+function addSizeRow() {
+  var values = {};
+  sizeTableData.columns.forEach(function(col) { values[col] = { nominal: '', actual: '' }; });
+  sizeTableData.rows.push({ measurement_point: '', tolerance: '', values: values });
+  renderSizeTable();
+}
+
+function removeSizeRow(index) {
+  sizeTableData.rows.splice(index, 1);
+  renderSizeTable();
+}
+
+function updateRowField(rowIdx, field, val) {
+  sizeTableData.rows[rowIdx][field] = val;
+  renderSizeTable();
+}
+
+function updateCellValue(rowIdx, col, field, val) {
+  if (!sizeTableData.rows[rowIdx].values) sizeTableData.rows[rowIdx].values = {};
+  if (!sizeTableData.rows[rowIdx].values[col]) sizeTableData.rows[rowIdx].values[col] = { nominal: '', actual: '' };
+  sizeTableData.rows[rowIdx].values[col][field] = val;
+  renderSizeTable();
+}
+
+function uploadTemplateFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var formData = new FormData();
+  formData.append('file', file);
+  if (sizeTableData.rows.length > 0) {
+    if (!confirm('上传模板将覆盖现有数据，确定继续？')) { input.value = ''; return; }
+  }
+
+  fetch('<%= import_size_template_inspection_record_report_path(report.inspection_record) %>', {
+    method: 'POST',
+    body: formData,
+    headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content }
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.error) { alert(data.error); return; }
+    var columns = sizeTableData.columns.length > 0 ? sizeTableData.columns : ['S','M','L','XL'];
+    sizeTableData.rows = data.measurement_points.map(function(mp) {
+      var values = {};
+      columns.forEach(function(col) { values[col] = { nominal: '', actual: '' }; });
+      return { measurement_point: mp.measurement_point, tolerance: mp.tolerance, values: values };
+    });
+    sizeTableData.columns = columns;
+    renderSizeTable();
+  })
+  .catch(function(err) { alert('上传失败: ' + err.message); });
+  input.value = '';
+}
+
+renderSizeTable();
+</script>

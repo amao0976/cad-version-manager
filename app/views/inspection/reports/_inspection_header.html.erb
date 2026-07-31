@@ -1,0 +1,38 @@
+<div class="card mb-3">
+  <div class="card-header fw-bold">检验基本信息</div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <p><strong>周次：</strong>第 <%= record.week %> 周</p>
+        <p><strong>验货日期：</strong><%= l(record.inspection_date, format: :long) %></p>
+        <p><strong>验货员：</strong><%= record.qc_name %></p>
+        <p><strong>供应商：</strong><%= record.supplier_name %></p>
+      </div>
+      <div class="col-md-6">
+        <p><strong>工厂：</strong><%= record.factory_name %></p>
+        <p><strong>订单号：</strong><%= record.order_no %></p>
+        <p><strong>参考号：</strong><%= record.reference_no %></p>
+        <p><strong>检验类型：</strong><%= record.inspection_type %></p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <p><strong>订单数量：</strong><%= record.order_quantity %></p>
+      </div>
+      <div class="col-md-4">
+        <p><strong>出货数量：</strong><%= record.shipment_quantity %></p>
+      </div>
+      <div class="col-md-4">
+        <p><strong>检验结果：</strong>
+          <% if record.result == 'pass' %>
+            <span class="badge bg-success">合格</span>
+          <% elsif record.result == 'fail' %>
+            <span class="badge bg-danger">不合格</span>
+          <% else %>
+            <span class="badge bg-secondary"><%= record.result_label %></span>
+          <% end %>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

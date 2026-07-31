@@ -1,0 +1,123 @@
+<%= form_with model: @report, url: inspection_record_report_path(@record) do |f| %>
+  <% if @report.errors.any? %>
+    <div class="alert alert-danger">
+      <ul class="mb-0">
+        <% @report.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= render 'inspection_header', record: @record %>
+
+  <div class="card mb-3">
+    <div class="card-header fw-bold">产品信息</div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <%= f.label :style_description, '款式描述', class: 'form-label' %>
+            <%= f.text_field :style_description, class: 'form-control' %>
+          </div>
+          <div class="mb-3">
+            <%= f.label :color, '颜色', class: 'form-label' %>
+            <%= f.text_field :color, class: 'form-control' %>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mb-3">
+            <%= f.label :material_composition, '材质成分', class: 'form-label' %>
+            <%= f.text_field :material_composition, class: 'form-control' %>
+          </div>
+          <div class="mb-3">
+            <%= f.label :size_range, '尺码范围', class: 'form-label' %>
+            <%= f.text_field :size_range, class: 'form-control', placeholder: 'S-M-L-XL' %>
+          </div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <%= f.label :product_remarks, '产品备注', class: 'form-label' %>
+        <%= f.text_area :product_remarks, class: 'form-control', rows: 3 %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header fw-bold">产品图片</div>
+    <div class="card-body">
+      <%= render 'image_upload_section', title: '产品概览', section_id: 'product_overview', field_name: 'inspection_report[product_overview_images][]', report: @report, editable: true, existing_images: @report.product_overview_images %>
+      <%= render 'image_upload_section', title: '标签/吊牌', section_id: 'label_hangtag', field_name: 'inspection_report[label_hangtag_images][]', report: @report, editable: true, existing_images: @report.label_hangtag_images %>
+      <%= render 'image_upload_section', title: 'RFID', section_id: 'rfid', field_name: 'inspection_report[rfid_images][]', report: @report, editable: true, existing_images: @report.rfid_images %>
+      <%= render 'image_upload_section', title: '缺陷详情', section_id: 'defect_details', field_name: 'inspection_report[defect_detail_images][]', report: @report, editable: true, existing_images: @report.defect_detail_images %>
+    </div>
+  </div>
+
+  <%= render 'size_table_editor', report: @report %>
+
+  <div class="card mb-3">
+    <div class="card-header fw-bold">检验摘要</div>
+    <div class="card-body">
+      <%= f.text_area :summary, class: 'form-control', rows: 4, placeholder: '请输入检验摘要...' %>
+    </div>
+  </div>
+
+  <div class="mb-3 d-flex gap-2">
+    <%= f.hidden_field :status, value: 'draft' %>
+    <%= f.submit '保存草稿', class: 'btn btn-secondary', name: 'inspection_report[status]', value: 'draft' %>
+    <%= f.submit '标记为完成', class: 'btn btn-primary', name: 'inspection_report[status]', value: 'completed' %>
+    <%= link_to '取消', @record.present? ? inspection_record_path(@record) : inspection_reports_path, class: 'btn btn-outline-secondary' %>
+  </div>
+<% end %>
+
+<script>
+function handleDragOver(e, zoneId) {
+  e.preventDefault();
+  e.stopPropagation();
+  var el = document.getElementById(zoneId);
+  if (el) el.style.borderColor = 'var(--primary)';
+}
+
+function handleDragLeave(e, zoneId) {
+  e.preventDefault();
+  e.stopPropagation();
+  var el = document.getElementById(zoneId);
+  if (el) el.style.borderColor = '';
+}
+
+function handleDrop(e, zoneId, inputId) {
+  e.preventDefault();
+  e.stopPropagation();
+  var el = document.getElementById(zoneId);
+  if (el) el.style.borderColor = '';
+  var files = e.dataTransfer.files;
+  if (files.length === 0) return;
+  var input = document.getElementById(inputId);
+  input.files = files;
+  previewFiles(input, zoneId.replace('_dropzone', ''));
+}
+
+function previewFiles(input, sectionId) {
+  var gallery = document.getElementById(sectionId + '_gallery');
+  if (!gallery) return;
+  var files = input.files;
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    if (!file.type.startsWith('image/')) continue;
+    var reader = new FileReader();
+    reader.onload = (function(gal) {
+      return function(e) {
+        var wrapper = document.createElement('div');
+        wrapper.className = 'image-thumb-wrapper';
+        wrapper.style.cssText = 'position:relative; display:inline-block; margin: 4px;';
+        var img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.cssText = 'width:120px; height:90px; object-fit:cover; border-radius:6px; border:1px solid var(--border);';
+        wrapper.appendChild(img);
+        gal.appendChild(wrapper);
+      };
+    })(gallery);
+    reader.readAsDataURL(file);
+  }
+}
+</script>

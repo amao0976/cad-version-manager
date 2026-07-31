@@ -2,6 +2,7 @@ class BomItem < ApplicationRecord
   belongs_to :product_bom
   belongs_to :design_drawing, optional: true
   belongs_to :parent, class_name: 'BomItem', optional: true
+  belongs_to :color, optional: true
   has_many :sub_items, class_name: 'BomItem', foreign_key: 'parent_id', dependent: :destroy
 
   validates :part_number, presence: true, length: { maximum: 100 }

@@ -1,0 +1,45 @@
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-4">
+    <div class="card shadow-sm mt-5">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <i class="bi bi-box-seam-fill" style="font-size: 3rem; color: #2563eb;"></i>
+          <h2 class="mt-2 mb-1">注册新账号</h2>
+          <p class="text-muted">创建您的 CAD 管理系统账号</p>
+        </div>
+
+        <%= form_with url: user_registration_path, method: :post do |f| %>
+          <div class="mb-3">
+            <label class="form-label">邮箱</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+              <%= f.email_field :email, class: 'form-control', autofocus: true, autocomplete: 'email', placeholder: 'your@email.com' %>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">密码</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock"></i></span>
+              <%= f.password_field :password, class: 'form-control', autocomplete: 'new-password', placeholder: '至少 6 位' %>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">确认密码</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+              <%= f.password_field :password_confirmation, class: 'form-control', autocomplete: 'new-password', placeholder: '再次输入密码' %>
+            </div>
+          </div>
+
+          <%= f.submit '注册', class: 'btn btn-primary w-100 mb-3' %>
+        <% end %>
+
+        <div class="text-center">
+          <%= link_to '已有账号？登录', new_user_session_path, class: 'text-decoration-none' %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
