@@ -21,3 +21,11 @@ production:
     <<: *default
     adapter: postgresql
     url: <%= ENV.fetch("DATABASE_URL") { "postgres://localhost/cad_version_manager_production" } %>
+  cache:
+    <<: *default
+    adapter: postgresql
+    url: <%= ENV.fetch("DATABASE_URL") { "postgres://localhost/cad_version_manager_production" } %>
+  queue:
+    <<: *default
+    adapter: postgresql
+    url: <%= ENV.fetch("DATABASE_URL") { "postgres://localhost/cad_version_manager_production" } %>
