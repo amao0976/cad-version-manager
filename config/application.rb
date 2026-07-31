@@ -15,6 +15,11 @@ module CadVersionManager
     config.autoload_paths << Rails.root.join('app', 'uploaders')
     config.eager_load_paths << Rails.root.join('app', 'uploaders')
 
+    # Configure Zeitwerk inflections for non-standard naming
+    config.autoloaders.main.inflector.inflect(
+      "web_dav_storage_service" => "WebDAVStorageService"
+    )
+
     # Ensure middleware stack is configured correctly
     config.middleware.use ActionDispatch::Flash
     config.middleware.use ActionDispatch::Cookies
