@@ -1,7 +1,7 @@
 require "active_storage/service"
 require "webdav"
 
-class WebDAVStorageService < ActiveStorage::Service
+class WebDavStorageService < ActiveStorage::Service
   def initialize(url:, username:, password:, folder_structure: "project_drawing_version")
     @url = url
     @username = username
@@ -118,7 +118,7 @@ class WebDAVStorageService < ActiveStorage::Service
   def ensure_connection
     return if @client
 
-    @client = WebDAV.new(@url, username: @username, password: @password)
+    @client = Webdav.new(@url, username: @username, password: @password)
   end
 
   def sanitize_name(name)
