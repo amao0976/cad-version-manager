@@ -1,5 +1,5 @@
 # Railway 部署配置
-# 后端 Rails API 服务配置
+# 后端 Rails API 服务
 
 [service]
   name = "cad-version-api"
@@ -7,10 +7,10 @@
 
 [build]
   builder = "nixpacks"
-  buildCommand = "BUNDLE_GEMFILE=Gemfile.railway bundle install && BUNDLE_GEMFILE=Gemfile.railway bundle exec rails assets:precompile"
+  buildCommand = "bundle install && bundle exec rails assets:precompile"
 
 [deploy]
-  startCommand = "BUNDLE_GEMFILE=Gemfile.railway bundle exec puma -b tcp://0.0.0.0:$PORT -e production"
+  startCommand = "bundle exec puma -b tcp://0.0.0.0:$PORT -e production"
 
 [env]
   RAILS_ENV = "production"

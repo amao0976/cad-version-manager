@@ -4,9 +4,9 @@ source "https://rubygems.org"
 gem "rails", "~> 8.1.3"
 
 # Use the database for Active Record
-# Default: sqlite3 for development
-# In production (Railway), use Gemfile.railway which includes pg gem
+# sqlite3 for development, pg for production (Railway)
 gem "sqlite3", "~> 2.0"
+gem "pg", "~> 1.1"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
