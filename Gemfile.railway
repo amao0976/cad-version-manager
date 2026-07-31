@@ -1,5 +1,6 @@
 # Railway 生产环境 Gemfile
 # 在 Railway 上部署时，设置 BUNDLE_GEMFILE=Gemfile.railway
+# 此文件使用 PostgreSQL 替代 SQLite3
 
 source "https://rubygems.org"
 
@@ -28,7 +29,6 @@ gem "turbo-rails"
 gem "stimulus-rails"
 gem "importmap-rails"
 gem "propshaft"
-gem "rack-cors"
 gem "webdav"
 gem "caxlsx"
 gem "roo", "~> 2.10"
@@ -42,6 +42,3 @@ gem "rouge"
 gem "sanitize"
 gem "carrierwave"
 gem "mini_magick"
-
-# Rails Assets (required for production)
-gem "sprockets-rails"

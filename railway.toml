@@ -5,7 +5,8 @@
 [api]
   name = "cad-version-api"
   # 使用专门的生产环境 Gemfile（包含 pg gem）
-  buildCommand = "BUNDLE_GEMFILE=Gemfile.railway bundle install && BUNDLE_GEMFILE=Gemfile.railway bundle exec rails assets:precompile"
+  # 先禁用冻结模式，然后安装依赖并预编译资源
+  buildCommand = "BUNDLE_GEMFILE=Gemfile.railway bundle config set --local frozen false && BUNDLE_GEMFILE=Gemfile.railway bundle install && BUNDLE_GEMFILE=Gemfile.railway bundle exec rails assets:precompile"
   startCommand = "BUNDLE_GEMFILE=Gemfile.railway bundle exec puma -b tcp://0.0.0.0:$PORT -e production"
 
 [api.env]
@@ -14,6 +15,7 @@
   # 注意：以下变量需在 Railway Variables 中手动设置
   # SECRET_KEY_BASE - 运行 `rails secret` 生成
   # DATABASE_URL - Railway PostgreSQL 插件会自动注入
+  # FRONTEND_URL - 前端部署后获取的域名
 
 # 前端 React/Vite 服务
 [frontend]

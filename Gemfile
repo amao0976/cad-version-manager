@@ -2,12 +2,11 @@ source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.1.3"
+
 # Use the database for Active Record
-# sqlite3 for all platforms (development)
-gem "sqlite3", "~> 1.7"
-# pg for production deployment (Railway uses Linux)
-# Uncomment the following line and comment sqlite3 for production:
-# gem "pg", "~> 1.1"
+# Default: sqlite3 for development
+# In production (Railway), use Gemfile.railway which includes pg gem
+gem "sqlite3", "~> 2.0"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
@@ -60,9 +59,6 @@ gem "importmap-rails"
 
 # Asset pipeline
 gem "propshaft"
-
-# Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
-gem "rack-cors"
 
 # WebDAV client for uploading files to NAS (like UGREEN NAS)
 gem "webdav"
