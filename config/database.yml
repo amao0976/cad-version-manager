@@ -13,6 +13,11 @@ test:
   database: db/test.sqlite3
 
 production:
-  <<: *default
-  adapter: postgresql
-  url: <%= ENV.fetch("DATABASE_URL") { "postgres://localhost/cad_version_manager_production" } %>
+  primary:
+    <<: *default
+    adapter: postgresql
+    url: <%= ENV.fetch("DATABASE_URL") { "postgres://localhost/cad_version_manager_production" } %>
+  cable:
+    <<: *default
+    adapter: postgresql
+    url: <%= ENV.fetch("DATABASE_URL") { "postgres://localhost/cad_version_manager_production" } %>
