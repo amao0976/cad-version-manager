@@ -59,6 +59,8 @@ export const apiService = {
   inspectionRequests: {
     list: (params?: any) => api.get('/inspection/requests', { params }),
     get: (id: number) => api.get(`/inspection/requests/${id}`),
+    create: (data: any) => api.post('/inspection/requests', { inspection_request: data }),
+    newOptions: () => api.get('/inspection/requests/new_options'),
     schedule: (id: number) => api.patch(`/inspection/requests/${id}/schedule`),
     complete: (id: number) => api.patch(`/inspection/requests/${id}/complete`),
     cancel: (id: number) => api.patch(`/inspection/requests/${id}/cancel`),
@@ -66,6 +68,8 @@ export const apiService = {
   inspectionRecords: {
     list: (params?: any) => api.get('/inspection/records', { params }),
     get: (id: number) => api.get(`/inspection/records/${id}`),
+    create: (data: any) => api.post('/inspection/records', { inspection_record: data }),
+    newOptions: () => api.get('/inspection/records/new_options'),
     pending: () => api.get('/inspection/records/pending'),
     getReport: (id: number) => api.get(`/inspection/records/${id}/report`),
     createReport: (id: number) => api.post(`/inspection/records/${id}/create_report`),

@@ -3,7 +3,21 @@ module Api
     module Inspection
       class RecordsController < BaseController
         before_action :set_record, only: [:show, :report, :create_report]
-        
+
+        INSPECTION_TYPES = %w[中期检查 尾期检查 首件检查 过程检查].freeze
+
+        # GET /api/v1/inspection/records/new_options
+        def new_options
+          render json: {
+            data: {
+              suppliers: Supplier.order(:name).map { |s| { id: s.id, name: s.name } },
+              products: Product.order(:name).map { |p| { id: p.id, name: p.name } },
+              requests: ::Inspection::Request.where(status: [:pending, :scheduled]).order(created_at: :desc).map { |r| { id: r.id, order_number: r.order_number } },
+              inspection_types: INSPECTION_TYPES
+            }
+          }
+        end
+
         # GET /api/v1/inspection/records
         def index
           records = ::Inspection::Record.includes(:product, :supplier, :request, :report)
@@ -37,7 +51,18 @@ module Api
         def show
           render json: { data: serialize_record(@record) }
         end
-        
+
+        # POST /api/v1/inspection/records
+        def create
+          @record = ::Inspection::Record.new(record_params)
+
+          if @record.save
+            render json: { data: serialize_record(@record), message: '验货记录创建成功' }, status: :created
+          else
+            render json: { error: @record.errors.full_messages.join(', ') }, status: :unprocessable_entity
+          end
+        end
+
         # GET /api/v1/inspection/records/pending
         def pending
           records = ::Inspection::Record.includes(:product, :supplier)
@@ -81,6 +106,16 @@ module Api
         
         def set_record
           @record = ::Inspection::Record.find(params[:id])
+        end
+
+        def record_params
+          params.require(:inspection_record).permit(
+            :order_no, :reference_no, :inspection_date,
+            :inspection_type, :order_quantity, :shipment_quantity,
+            :major_defects, :minor_defects, :qty_rejected,
+            :result, :comments, :product_id, :supplier_id,
+            :inspection_request_id, :qc_name
+          )
         end
         
         def serialize_record(record)

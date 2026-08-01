@@ -11,6 +11,9 @@ Rails.application.routes.draw do
       # Inspection API
       namespace :inspection do
         resources :requests, controller: 'requests' do
+          collection do
+            get :new_options
+          end
           member do
             patch :schedule
             patch :complete
@@ -25,6 +28,7 @@ Rails.application.routes.draw do
           end
           collection do
             get :pending
+            get :new_options
           end
         end
 

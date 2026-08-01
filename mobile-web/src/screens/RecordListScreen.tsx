@@ -81,6 +81,12 @@ export default function RecordListScreen() {
         </button>
       </div>
 
+      <div style={{ padding: '8px 12px' }}>
+        <button className="btn btn-primary btn-block" onClick={() => navigate('/records/new')}>
+          + 新建验货记录
+        </button>
+      </div>
+
       <div className="status-tabs">
         {resultTabs.map(t => (
           <button

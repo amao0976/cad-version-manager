@@ -32,8 +32,11 @@ module Api
           code: supplier.code,
           name: supplier.name,
           supplier_type: supplier.supplier_type,
-          contact_name: supplier.contact_name,
-          contact_phone: supplier.contact_phone,
+          category: supplier.display_type,
+          contact_person: supplier.contact_person,
+          phone: supplier.phone,
+          email: supplier.email,
+          address: supplier.address,
           status: supplier.status
         }
       end

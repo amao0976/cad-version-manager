@@ -71,6 +71,12 @@ export default function RequestListScreen() {
         />
       </div>
 
+      <div style={{ padding: '0 12px 8px' }}>
+        <button className="btn btn-primary btn-block" onClick={() => navigate('/requests/new')}>
+          + 新建验货申请
+        </button>
+      </div>
+
       <div className="status-tabs">
         {statuses.map(s => (
           <button

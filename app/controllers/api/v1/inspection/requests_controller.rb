@@ -3,7 +3,22 @@ module Api
     module Inspection
       class RequestsController < BaseController
         before_action :set_request, only: [:show, :schedule, :complete, :cancel]
-        
+
+        INSPECTION_TYPES = %w[中期检查 尾期检查 首件检查 过程检查].freeze
+
+        # GET /api/v1/inspection/requests/new_options
+        def new_options
+          render json: {
+            data: {
+              suppliers: Supplier.order(:name).map { |s| { id: s.id, name: s.name } },
+              products: Product.order(:name).map { |p| { id: p.id, name: p.name } },
+              inspection_types: INSPECTION_TYPES,
+              inspection_levels: AqlCalculator::INSPECTION_LEVELS.map { |l| { value: l, label: AqlCalculator::INSPECTION_LEVEL_LABELS[l] } },
+              aql_levels: AqlCalculator::AQL_LEVELS
+            }
+          }
+        end
+
         # GET /api/v1/inspection/requests
         def index
           requests = ::Inspection::Request.includes(:supplier, :product, :items)
@@ -33,7 +48,19 @@ module Api
         def show
           render json: { data: serialize_request(@request) }
         end
-        
+
+        # POST /api/v1/inspection/requests
+        def create
+          @request = ::Inspection::Request.new(request_params)
+          @request.created_by = current_user
+
+          if @request.save
+            render json: { data: serialize_request(@request), message: '验货申请创建成功' }, status: :created
+          else
+            render json: { error: @request.errors.full_messages.join(', ') }, status: :unprocessable_entity
+          end
+        end
+
         # PATCH /api/v1/inspection/requests/:id/schedule
         def schedule
           if @request.may_schedule?
@@ -68,6 +95,16 @@ module Api
         
         def set_request
           @request = ::Inspection::Request.find(params[:id])
+        end
+
+        def request_params
+          params.require(:inspection_request).permit(
+            :product_id, :supplier_id, :factory_id,
+            :order_number, :style_number, :quantity,
+            :requested_date, :inspection_type,
+            :remarks,
+            items_attributes: [:id, :order_number, :style_number, :quantity, :inspection_level, :aql_level, :_destroy]
+          )
         end
         
         def serialize_request(request)
