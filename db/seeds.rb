@@ -367,3 +367,215 @@ puts "  - P-006 平垫片 (产品A、产品B、产品C、产品D)"
 puts "  - P-002 端盖组件 (产品A、产品D)"
 puts "  - P-003 密封垫圈 (产品A、产品D)"
 puts "  - P-001 主壳体 (产品A、产品D)"
+
+# ============================================================
+# 验货管理种子数据
+# ============================================================
+puts "\n开始创建验货管理数据..."
+
+# 加载手表分类种子数据
+load(Rails.root.join('db', 'seeds_watch_categories.rb').to_s) rescue nil
+
+# QC 用户
+qc_user = User.find_or_create_by!(email: 'qc@example.com') do |u|
+  u.password = 'password123'
+  u.password_confirmation = 'password123'
+  u.name = 'QC检验员'
+  u.role = 'qc'
+end
+puts "  QC账号: qc@example.com / password123"
+
+# 供应商
+supplier = Supplier.find_or_create_by!(code: 'SUP-001') do |s|
+  s.name = '深圳精密钟表制造有限公司'
+  s.short_name = '深圳精钟'
+  s.supplier_type = 'outsourcing'
+  s.status = 'active'
+  s.level = 'a'
+  s.contact_person = '张经理'
+  s.phone = '13800138001'
+  s.address = '深圳市宝安区钟表产业园'
+end
+
+supplier2 = Supplier.find_or_create_by!(code: 'SUP-002') do |s|
+  s.name = '广州表壳配件厂'
+  s.short_name = '广州表壳'
+  s.supplier_type = 'parts'
+  s.status = 'active'
+  s.level = 'b'
+  s.contact_person = '李厂长'
+  s.phone = '13900139002'
+  s.address = '广州市番禺区工业区'
+end
+
+# 产品（需要分类）
+watch_category = Category.find_by(code: 'WATCH') || Category.find_or_create_by!(code: 'WATCH') do |c|
+  c.name = '手表'
+  c.sort_order = 1
+end
+
+product = Product.find_or_create_by!(product_code: 'W-CLASSIC-001') do |p|
+  p.name = '经典商务机械表'
+  p.category = watch_category
+  p.status = 'published'
+  p.lifecycle_state = 'production'
+end
+
+product2 = Product.find_or_create_by!(product_code: 'W-SPORT-001') do |p|
+  p.name = '运动潜水石英表'
+  p.category = watch_category
+  p.status = 'published'
+  p.lifecycle_state = 'production'
+end
+
+# === 验货申请 ===
+# 1. 待处理 - 中期检查
+req1 = Inspection::Request.find_or_create_by!(order_number: 'PO-2026-1001', style_number: 'W-CLASSIC-001') do |r|
+  r.supplier = supplier
+  r.product = product
+  r.inspection_type = '中期检查'
+  r.requested_date = Date.today + 5
+  r.created_by = admin
+  r.items.build(order_number: 'PO-2026-1001', style_number: 'W-CLASSIC-001', quantity: 5000, inspection_level: 'II', aql_level: '2.5')
+  r.items.build(order_number: 'PO-2026-1001', style_number: 'W-CLASSIC-002', quantity: 3000, inspection_level: 'II', aql_level: '2.5')
+end
+
+# 2. 已排期 - 尾期检查
+req2 = Inspection::Request.find_or_create_by!(order_number: 'PO-2026-1002', style_number: 'W-SPORT-001') do |r|
+  r.supplier = supplier
+  r.product = product2
+  r.inspection_type = '尾期检查'
+  r.requested_date = Date.today + 3
+  r.created_by = admin
+  r.items.build(order_number: 'PO-2026-1002', style_number: 'W-SPORT-001', quantity: 8000, inspection_level: 'II', aql_level: '2.5')
+end
+req2.schedule! unless req2.status == 'scheduled'
+
+# 3. 已取消
+req3 = Inspection::Request.find_or_create_by!(order_number: 'PO-2026-1003', style_number: 'W-LUXE-001') do |r|
+  r.supplier = supplier2
+  r.product = product
+  r.inspection_type = '首件检查'
+  r.requested_date = Date.today - 5
+  r.created_by = admin
+  r.items.build(order_number: 'PO-2026-1003', style_number: 'W-LUXE-001', quantity: 1000, inspection_level: 'I', aql_level: '1.5')
+end
+req3.cancel! unless req3.status == 'cancelled'
+
+# 4. 待处理 - 过程检查
+req4 = Inspection::Request.find_or_create_by!(order_number: 'PO-2026-1004', style_number: 'W-DIVE-001') do |r|
+  r.supplier = supplier
+  r.product = product2
+  r.inspection_type = '过程检查'
+  r.requested_date = Date.today + 7
+  r.created_by = admin
+  r.items.build(order_number: 'PO-2026-1004', style_number: 'W-DIVE-001', quantity: 2000, inspection_level: 'III', aql_level: '1.5')
+end
+
+# 5. 已排期 - 中期检查
+req5 = Inspection::Request.find_or_create_by!(order_number: 'PO-2026-1005', style_number: 'W-CHRONO-001') do |r|
+  r.supplier = supplier2
+  r.product = product
+  r.inspection_type = '中期检查'
+  r.requested_date = Date.today + 2
+  r.created_by = admin
+  r.items.build(order_number: 'PO-2026-1005', style_number: 'W-CHRONO-001', quantity: 3500, inspection_level: 'II', aql_level: '2.5')
+  r.items.build(order_number: 'PO-2026-1005', style_number: 'W-CHRONO-002', quantity: 2500, inspection_level: 'II', aql_level: '2.5')
+end
+req5.schedule! unless req5.status == 'scheduled'
+
+puts "  验货申请: #{Inspection::Request.count} 条"
+
+# === 验货记录 ===
+# 1. 合格（关联已排期申请req2）
+rec1 = Inspection::Record.find_or_create_by!(order_no: 'PO-2026-1002', inspection_date: Date.today - 2) do |r|
+  r.inspection_request = req2
+  r.supplier = supplier
+  r.product = product2
+  r.reference_no = 'W-SPORT-001'
+  r.inspection_type = '尾期检查'
+  r.order_quantity = 8000
+  r.shipment_quantity = 8000
+  r.major_defects = 2
+  r.minor_defects = 5
+  r.qty_rejected = 10
+  r.result = 'pass'
+  r.qc_name = 'QC检验员'
+  r.comments = '产品质量良好，主要缺陷和次要缺陷均在AQL范围内。包装完整，标签正确。'
+end
+
+# 2. 不合格
+rec2 = Inspection::Record.find_or_create_by!(order_no: 'PO-2026-0995', inspection_date: Date.today - 7) do |r|
+  r.supplier = supplier
+  r.product = product
+  r.reference_no = 'W-CLASSIC-003'
+  r.inspection_type = '中期检查'
+  r.order_quantity = 5000
+  r.shipment_quantity = 4500
+  r.major_defects = 15
+  r.minor_defects = 28
+  r.qty_rejected = 120
+  r.result = 'fail'
+  r.qc_name = 'QC检验员'
+  r.comments = '主要缺陷数超出AQL接受标准。发现表盘划痕较多，需要返工处理。建议整改后重新验货。'
+end
+
+# 3. 合格（无报告）
+rec3 = Inspection::Record.find_or_create_by!(order_no: 'PO-2026-0988', inspection_date: Date.today - 1) do |r|
+  r.supplier = supplier
+  r.product = product2
+  r.reference_no = 'W-DIVE-001'
+  r.inspection_type = '过程检查'
+  r.order_quantity = 3000
+  r.shipment_quantity = 2800
+  r.major_defects = 1
+  r.minor_defects = 3
+  r.qty_rejected = 5
+  r.result = 'pass'
+  r.qc_name = 'QC检验员'
+  r.comments = '过程巡检合格，生产过程稳定。'
+end
+
+# 4. 不合格（无报告）
+rec4 = Inspection::Record.find_or_create_by!(order_no: 'PO-2026-0990', inspection_date: Date.today - 3) do |r|
+  r.supplier = supplier2
+  r.product = product
+  r.reference_no = 'W-CHRONO-001'
+  r.inspection_type = '首件检查'
+  r.order_quantity = 1500
+  r.shipment_quantity = 1400
+  r.major_defects = 8
+  r.minor_defects = 12
+  r.qty_rejected = 45
+  r.result = 'fail'
+  r.qc_name = 'QC检验员'
+  r.comments = '首件检查不合格。表壳螺纹偏差超出公差，需调整夹具后重新生产首件。'
+end
+
+# 5. 待检验
+rec5 = Inspection::Record.find_or_create_by!(order_no: 'PO-2026-1010', inspection_date: Date.today) do |r|
+  r.supplier = supplier
+  r.product = product2
+  r.reference_no = 'W-SPORT-002'
+  r.inspection_type = '中期检查'
+  r.order_quantity = 6000
+  r.shipment_quantity = 5500
+  r.qc_name = ''
+  r.comments = '验货进行中，等待QC判定结果。'
+end
+
+puts "  验货记录: #{Inspection::Record.count} 条"
+
+# === 验货报告 ===
+report1 = Inspection::Report.find_or_create_by!(inspection_record: rec1) do |r|
+  r.status = 'draft'
+  r.summary = '本次尾期检验结果合格，产品符合质量要求。抽样检验合格，包装和标签正确。'
+end
+
+report2 = Inspection::Report.find_or_create_by!(inspection_record: rec2) do |r|
+  r.status = 'draft'
+  r.summary = '本次中期检验结果不合格，主要缺陷超标，需返工处理。'
+end
+
+puts "  验货报告: #{Inspection::Report.count} 条"
+puts "验货管理数据创建完成！"
