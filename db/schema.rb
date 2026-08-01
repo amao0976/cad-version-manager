@@ -454,7 +454,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_31_000010) do
     t.integer "position", default: 0
     t.integer "product_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["product_id", "is_cover"], name: "index_product_images_on_product_id_and_is_cover", unique: true, where: "is_cover = 1"
+    t.index ["product_id", "is_cover"], name: "index_product_images_on_product_id_and_is_cover", unique: true, where: "is_cover = true"
     t.index ["product_id", "position"], name: "index_product_images_on_product_id_and_position"
     t.index ["product_id"], name: "index_product_images_on_product_id"
   end

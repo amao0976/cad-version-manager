@@ -8,6 +8,6 @@ class CreateProductImages < ActiveRecord::Migration[8.0]
       t.timestamps
     end
     add_index :product_images, [:product_id, :position]
-    add_index :product_images, [:product_id, :is_cover], unique: true, where: 'is_cover = 1'
+    add_index :product_images, [:product_id, :is_cover], unique: true, where: 'is_cover = true'
   end
 end
