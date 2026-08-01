@@ -37,6 +37,20 @@ export default function RecordDetailScreen() {
     }
   };
 
+  const handleViewReport = async () => {
+    try {
+      const response = await apiService.inspectionRecords.getReport(Number(id));
+      const reportId = response.data.data?.id;
+      if (reportId) {
+        navigate(`/reports/${reportId}`);
+      } else {
+        alert('报告数据异常');
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.error || '获取报告失败');
+    }
+  };
+
   if (isLoading) return <div className="loading-container"><div className="loading-spinner" /></div>;
   if (!record) return <div className="empty-state"><div className="empty-state-text">未找到验货记录</div></div>;
 
@@ -56,9 +70,9 @@ export default function RecordDetailScreen() {
             <span className="badge" style={{ background: resultColor }}>{resultLabel}</span>
           </div>
           {record.has_report ? (
-            <button 
-              className="btn btn-primary btn-block" 
-              onClick={() => navigate(`/reports/${id}`)}
+            <button
+              className="btn btn-primary btn-block"
+              onClick={handleViewReport}
               style={{ marginTop: '10px' }}
             >
               📄 查看验货报告

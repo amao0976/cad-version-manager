@@ -90,7 +90,8 @@ export default function CreateRequestScreen() {
       alert('验货申请创建成功');
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.error || '创建失败');
+      const errData = err.response?.data;
+      setError(errData?.error || errData?.message || errData?.errors?.join(', ') || '创建失败，请检查输入信息');
     } finally {
       setIsSaving(false);
     }

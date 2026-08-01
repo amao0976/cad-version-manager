@@ -100,6 +100,7 @@ export default function RequestDetailScreen() {
         {request.can_schedule && <button className="btn btn-warning" onClick={() => handleAction('schedule')}>排期</button>}
         {request.can_complete && <button className="btn btn-success" onClick={() => handleAction('complete')}>完成</button>}
         {request.can_cancel && <button className="btn btn-danger" onClick={() => handleAction('cancel')}>取消</button>}
+        {request.status === 'scheduled' && <button className="btn btn-primary" onClick={() => navigate(`/records/new?request_id=${request.id}`)}>创建验货记录</button>}
       </div>
     </div>
   );

@@ -82,6 +82,8 @@ export const apiService = {
       api.post(`/inspection/reports/${id}/upload_image`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       }),
+    removeImage: (id: number, attachmentId: number) =>
+      api.delete(`/inspection/reports/${id}/remove_image`, { params: { attachment_id: attachmentId } }),
   },
   suppliers: {
     list: () => api.get('/suppliers'),

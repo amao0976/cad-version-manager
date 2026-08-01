@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -9,6 +9,9 @@ interface RequestOption { id: number; order_number: string; }
 export default function CreateRecordScreen() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const presetRequestId = searchParams.get('request_id');
+
   const [options, setOptions] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -20,7 +23,7 @@ export default function CreateRecordScreen() {
   const [inspectionType, setInspectionType] = useState('中期检查');
   const [supplierId, setSupplierId] = useState('');
   const [productId, setProductId] = useState('');
-  const [requestId, setRequestId] = useState('');
+  const [requestId, setRequestId] = useState(presetRequestId || '');
   const [orderQty, setOrderQty] = useState('');
   const [shipmentQty, setShipmentQty] = useState('');
   const [majorDefects, setMajorDefects] = useState('0');
@@ -34,7 +37,27 @@ export default function CreateRecordScreen() {
   const loadOptions = async () => {
     try {
       const response = await apiService.inspectionRecords.newOptions();
-      setOptions(response.data.data);
+      const opts = response.data.data;
+      setOptions(opts);
+
+      // 如果有预设的 request_id，自动加载验货申请信息
+      if (presetRequestId) {
+        try {
+          const reqResponse = await apiService.inspectionRequests.get(Number(presetRequestId));
+          const req = reqResponse.data.data;
+          if (req) {
+            const firstItem = req.items?.[0];
+            setOrderNo(firstItem?.order_number || req.order_number || '');
+            setReferenceNo(firstItem?.style_number || req.style_number || '');
+            setInspectionType(req.inspection_type || '中期检查');
+            setSupplierId(req.supplier?.id ? String(req.supplier.id) : '');
+            setProductId(req.product?.id ? String(req.product.id) : '');
+            setOrderQty(req.quantity ? String(req.quantity) : '');
+          }
+        } catch {
+          // 忽略加载失败
+        }
+      }
     } catch {
       setError('加载选项数据失败');
     } finally {
@@ -71,7 +94,8 @@ export default function CreateRecordScreen() {
       alert('验货记录创建成功');
       navigate('/records');
     } catch (err: any) {
-      setError(err.response?.data?.error || '创建失败');
+      const errData = err.response?.data;
+      setError(errData?.error || errData?.message || errData?.errors?.join(', ') || '创建失败，请检查输入信息');
     } finally {
       setIsSaving(false);
     }
