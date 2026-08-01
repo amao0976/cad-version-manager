@@ -1,10 +1,7 @@
 # Railway 前端部署配置
+# 生产环境变量请通过 Railway Dashboard 的 Variables 面板设置 VITE_API_BASE_URL
+# 不要在此文件中写空值，否则会覆盖 .env.production
 [build]
   builder = "nixpacks"
   buildCommand = "npm install && npm run build"
   startCommand = "npx serve dist -l $PORT"
-
-[env]
-  # 生产环境构建时的 API 地址
-  # 部署到 Railway 后，需要将此值改为后端服务的实际域名
-  VITE_API_BASE_URL = ""
