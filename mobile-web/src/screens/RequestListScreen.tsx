@@ -50,7 +50,6 @@ export default function RequestListScreen() {
     { key: null, label: '全部' },
     { key: 'pending', label: '待处理' },
     { key: 'scheduled', label: '已排期' },
-    { key: 'completed', label: '已完成' },
     { key: 'cancelled', label: '已取消' },
   ];
 

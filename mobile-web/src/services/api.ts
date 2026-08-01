@@ -62,12 +62,12 @@ export const apiService = {
     create: (data: any) => api.post('/inspection/requests', { inspection_request: data }),
     newOptions: () => api.get('/inspection/requests/new_options'),
     schedule: (id: number) => api.patch(`/inspection/requests/${id}/schedule`),
-    complete: (id: number) => api.patch(`/inspection/requests/${id}/complete`),
     cancel: (id: number) => api.patch(`/inspection/requests/${id}/cancel`),
   },
   inspectionRecords: {
     list: (params?: any) => api.get('/inspection/records', { params }),
     get: (id: number) => api.get(`/inspection/records/${id}`),
+    update: (id: number, data: any) => api.patch(`/inspection/records/${id}`, { inspection_record: data }),
     create: (data: any) => api.post('/inspection/records', { inspection_record: data }),
     newOptions: () => api.get('/inspection/records/new_options'),
     pending: () => api.get('/inspection/records/pending'),

@@ -2,7 +2,7 @@ module Api
   module V1
     module Inspection
       class RecordsController < BaseController
-        before_action :set_record, only: [:show, :report, :create_report]
+        before_action :set_record, only: [:show, :update, :report, :create_report]
 
         INSPECTION_TYPES = %w[中期检查 尾期检查 首件检查 过程检查].freeze
 
@@ -50,6 +50,16 @@ module Api
         # GET /api/v1/inspection/records/:id
         def show
           render json: { data: serialize_record(@record) }
+        end
+
+        # PATCH /api/v1/inspection/records/:id
+        # 支持QC判定合格/不合格，以及更新验货结果字段
+        def update
+          if @record.update(record_update_params)
+            render json: { data: serialize_record(@record), message: '验货记录已更新' }
+          else
+            render json: { error: @record.errors.full_messages.join(', ') }, status: :unprocessable_entity
+          end
         end
 
         # POST /api/v1/inspection/records
@@ -115,6 +125,13 @@ module Api
             :major_defects, :minor_defects, :qty_rejected,
             :result, :comments, :product_id, :supplier_id,
             :inspection_request_id, :qc_name
+          )
+        end
+
+        def record_update_params
+          params.require(:inspection_record).permit(
+            :result, :comments, :major_defects, :minor_defects,
+            :qty_rejected, :qc_name
           )
         end
         

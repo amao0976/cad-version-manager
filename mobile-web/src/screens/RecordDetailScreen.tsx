@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function RecordDetailScreen() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [record, setRecord] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreatingReport, setIsCreatingReport] = useState(false);
+  const [isSavingResult, setIsSavingResult] = useState(false);
 
   const loadRecord = useCallback(async () => {
     try {
@@ -34,6 +37,24 @@ export default function RecordDetailScreen() {
       alert(error.response?.data?.error || '创建失败');
     } finally {
       setIsCreatingReport(false);
+    }
+  };
+
+  const handleSetResult = async (resultValue: string) => {
+    const resultLabel = resultValue === 'pass' ? '合格' : resultValue === 'fail' ? '不合格' : '待检验';
+    if (!confirm(`确定判定为【${resultLabel}】吗？`)) return;
+    try {
+      setIsSavingResult(true);
+      const response = await apiService.inspectionRecords.update(Number(id), {
+        result: resultValue === '' ? null : resultValue,
+        qc_name: user?.name,
+      });
+      setRecord(response.data.data);
+      alert(`已判定为【${resultLabel}】`);
+    } catch (error: any) {
+      alert(error.response?.data?.error || '判定失败');
+    } finally {
+      setIsSavingResult(false);
     }
   };
 
@@ -69,6 +90,40 @@ export default function RecordDetailScreen() {
             <span className="card-title">{record.order_no}</span>
             <span className="badge" style={{ background: resultColor }}>{resultLabel}</span>
           </div>
+
+          {/* QC 判定结果按钮 */}
+          <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>QC 判定结果：</div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                className="btn btn-success"
+                style={{ flex: 1 }}
+                onClick={() => handleSetResult('pass')}
+                disabled={isSavingResult}
+              >
+                ✓ 判定合格
+              </button>
+              <button
+                className="btn btn-danger"
+                style={{ flex: 1 }}
+                onClick={() => handleSetResult('fail')}
+                disabled={isSavingResult}
+              >
+                ✗ 判定不合格
+              </button>
+            </div>
+            {record.result && (
+              <button
+                className="btn btn-secondary"
+                style={{ padding: '8px' }}
+                onClick={() => handleSetResult('')}
+                disabled={isSavingResult}
+              >
+                重置为待检验
+              </button>
+            )}
+          </div>
+
           {record.has_report ? (
             <button
               className="btn btn-primary btn-block"

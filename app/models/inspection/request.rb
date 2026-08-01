@@ -25,15 +25,10 @@ class Inspection::Request < ApplicationRecord
   aasm column: :status do
     state :pending, initial: true
     state :scheduled
-    state :completed
     state :cancelled
 
     event :schedule do
       transitions from: :pending, to: :scheduled
-    end
-
-    event :complete do
-      transitions from: :scheduled, to: :completed
     end
 
     event :cancel do
@@ -44,7 +39,6 @@ class Inspection::Request < ApplicationRecord
   STATUSES = {
     'pending' => '待处理',
     'scheduled' => '已排期',
-    'completed' => '已完成',
     'cancelled' => '已取消'
   }.freeze
 
@@ -53,7 +47,7 @@ class Inspection::Request < ApplicationRecord
   end
 
   def status_color
-    { 'pending' => '#f59e0b', 'scheduled' => '#2563eb', 'completed' => '#16a34a', 'cancelled' => '#dc2626' }[status] || '#6b7280'
+    { 'pending' => '#f59e0b', 'scheduled' => '#2563eb', 'cancelled' => '#dc2626' }[status] || '#6b7280'
   end
 
   def total_quantity

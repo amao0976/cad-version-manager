@@ -16,7 +16,6 @@ Rails.application.routes.draw do
           end
           member do
             patch :schedule
-            patch :complete
             patch :cancel
           end
         end

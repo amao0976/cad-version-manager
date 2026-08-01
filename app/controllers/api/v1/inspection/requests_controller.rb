@@ -65,22 +65,17 @@ module Api
         def schedule
           if @request.may_schedule?
             @request.schedule!
-            render json: { data: serialize_request(@request), message: '已排期' }
+            # 排期成功后，前端跳转到创建验货记录页面
+            render json: {
+              data: serialize_request(@request),
+              message: '已排期，请创建验货记录',
+              redirect: "records/new?request_id=#{@request.id}"
+            }
           else
             render json: { error: '当前状态无法排期' }, status: :unprocessable_entity
           end
         end
-        
-        # PATCH /api/v1/inspection/requests/:id/complete
-        def complete
-          if @request.may_complete?
-            @request.complete!
-            render json: { data: serialize_request(@request), message: '已完成' }
-          else
-            render json: { error: '当前状态无法完成' }, status: :unprocessable_entity
-          end
-        end
-        
+
         # PATCH /api/v1/inspection/requests/:id/cancel
         def cancel
           if @request.may_cancel?
@@ -123,7 +118,6 @@ module Api
             product: request.product ? { id: request.product.id, name: request.product.name, product_code: request.product.product_code } : nil,
             items: request.items.map { |item| serialize_item(item) },
             can_schedule: request.may_schedule?,
-            can_complete: request.may_complete?,
             can_cancel: request.may_cancel?,
             created_at: request.created_at,
             updated_at: request.updated_at

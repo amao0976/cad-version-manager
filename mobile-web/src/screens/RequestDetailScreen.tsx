@@ -22,12 +22,23 @@ export default function RequestDetailScreen() {
 
   useEffect(() => { loadRequest(); }, [loadRequest]);
 
-  const handleAction = async (action: 'schedule' | 'complete' | 'cancel') => {
-    if (!confirm(`确定要${action === 'schedule' ? '排期' : action === 'complete' ? '完成' : '取消'}此验货申请吗？`)) return;
+  const handleAction = async (action: 'schedule' | 'cancel') => {
+    if (!confirm(`确定要${action === 'schedule' ? '排期' : '取消'}此验货申请吗？`)) return;
     try {
-      await apiService.inspectionRequests[action](Number(id));
-      alert('操作成功');
-      loadRequest();
+      const response = await apiService.inspectionRequests[action](Number(id));
+      if (action === 'schedule') {
+        // 排期成功后直接跳转到创建验货记录
+        const redirect = response.data.redirect;
+        if (redirect) {
+          navigate(`/${redirect}`);
+        } else {
+          alert('已排期');
+          loadRequest();
+        }
+      } else {
+        alert('已取消');
+        loadRequest();
+      }
     } catch (error: any) {
       alert(error.response?.data?.error || '操作失败');
     }
@@ -85,10 +96,9 @@ export default function RequestDetailScreen() {
       </div>
 
       <div className="action-bar">
-        {request.can_schedule && <button className="btn btn-warning" onClick={() => handleAction('schedule')}>排期</button>}
-        {request.can_complete && <button className="btn btn-success" onClick={() => handleAction('complete')}>完成</button>}
-        {request.can_cancel && <button className="btn btn-danger" onClick={() => handleAction('cancel')}>取消</button>}
+        {request.can_schedule && <button className="btn btn-warning" onClick={() => handleAction('schedule')}>QC确认排期</button>}
         {request.status === 'scheduled' && <button className="btn btn-primary" onClick={() => navigate(`/records/new?request_id=${request.id}`)}>创建验货记录</button>}
+        {request.can_cancel && <button className="btn btn-danger" onClick={() => handleAction('cancel')}>取消</button>}
       </div>
     </div>
   );
