@@ -5,14 +5,33 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 let authToken: string | null = localStorage.getItem('auth_token');
 
-const api: AxiosInstance = axios.create({
+interface ApiClient extends AxiosInstance {
+  setAuthToken: (token: string) => void;
+  getAuthToken: () => string | null;
+  clearAuthToken: () => void;
+}
+
+const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-});
+}) as ApiClient;
+
+api.setAuthToken = (token: string) => {
+  authToken = token;
+  localStorage.setItem('auth_token', token);
+};
+
+api.getAuthToken = () => authToken;
+
+api.clearAuthToken = () => {
+  authToken = null;
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('user_data');
+};
 
 // 请求拦截器
 api.interceptors.request.use((config) => {
@@ -69,19 +88,6 @@ export const apiService = {
     logout: () => api.delete('/auth/logout'),
     me: () => api.get('/auth/me'),
   },
-};
-
-api.setAuthToken = (token: string) => {
-  authToken = token;
-  localStorage.setItem('auth_token', token);
-};
-
-api.getAuthToken = () => authToken;
-
-api.clearAuthToken = () => {
-  authToken = null;
-  localStorage.removeItem('auth_token');
-  localStorage.removeItem('user_data');
 };
 
 export default api;
