@@ -7,7 +7,7 @@ class Inspection::Request < ApplicationRecord
   belongs_to :created_by, class_name: 'User', optional: true
   belongs_to :inspection_record, class_name: 'Inspection::Record', foreign_key: 'inspection_id', optional: true
 
-  has_many :items, class_name: 'Inspection::RequestItem', foreign_key: :inspection_request_id, dependent: :destroy
+  has_many :items, class_name: 'Inspection::RequestItem', foreign_key: :inspection_request_id, dependent: :destroy, inverse_of: :inspection_request
   has_many :inspection_records, class_name: 'Inspection::Record', foreign_key: :inspection_request_id, dependent: :nullify
 
   has_many_attached :approval_screenshots

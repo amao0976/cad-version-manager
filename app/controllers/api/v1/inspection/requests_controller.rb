@@ -2,7 +2,7 @@ module Api
   module V1
     module Inspection
       class RequestsController < BaseController
-        before_action :set_request, only: [:show, :schedule, :complete, :cancel]
+        before_action :set_request, only: [:show, :schedule, :cancel]
 
         INSPECTION_TYPES = %w[中期检查 尾期检查 首件检查 过程检查].freeze
 
@@ -112,7 +112,6 @@ module Api
             status_label: request.status_label,
             inspection_type: request.inspection_type,
             requested_date: request.requested_date,
-            result: request.result,
             remarks: request.remarks,
             supplier: request.supplier ? { id: request.supplier.id, name: request.supplier.name } : nil,
             product: request.product ? { id: request.product.id, name: request.product.name, product_code: request.product.product_code } : nil,

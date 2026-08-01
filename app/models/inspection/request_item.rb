@@ -1,7 +1,7 @@
 class Inspection::RequestItem < ApplicationRecord
   self.table_name = 'inspection_request_items'
 
-  belongs_to :inspection_request, class_name: 'Inspection::Request'
+  belongs_to :inspection_request, class_name: 'Inspection::Request', optional: true, inverse_of: :items
 
   # 支持 accepts_nested_attributes_for 的别名
   def request_id

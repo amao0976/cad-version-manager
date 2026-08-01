@@ -20,10 +20,10 @@ module Api
 
         # GET /api/v1/inspection/records
         def index
-          records = ::Inspection::Record.includes(:product, :supplier, :request, :report)
-          
+          records = ::Inspection::Record.includes(:product, :supplier, :inspection_request, :report)
+
           if params[:status].present?
-            records = records.joins(:request).where(inspection_requests: { status: params[:status] })
+            records = records.joins(:inspection_request).where(inspection_requests: { status: params[:status] })
           end
           
           if params[:result].present?
@@ -152,7 +152,7 @@ module Api
             comments: record.comments,
             product: record.product ? { id: record.product.id, name: record.product.name, product_code: record.product.product_code, cover_image: record.product.cover_image&.image&.url } : nil,
             supplier: record.supplier ? { id: record.supplier.id, name: record.supplier.name } : nil,
-            request: record.request ? { id: record.request.id, status: record.request.status, status_label: record.request.status_label } : nil,
+            request: record.inspection_request ? { id: record.inspection_request.id, status: record.inspection_request.status, status_label: record.inspection_request.status_label } : nil,
             has_report: record.report.present?,
             created_at: record.created_at,
             updated_at: record.updated_at
