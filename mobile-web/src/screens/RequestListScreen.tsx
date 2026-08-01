@@ -11,7 +11,6 @@ interface InspectionRequest {
   status_label: string;
   inspection_type: string;
   requested_date: string;
-  result: string | null;
   supplier: { id: number; name: string } | null;
   can_schedule: boolean;
   can_complete: boolean;
@@ -111,14 +110,6 @@ export default function RequestListScreen() {
               <div className="info-row"><span className="info-label">类型:</span><span className="info-value">{r.inspection_type}</span></div>
               <div className="info-row"><span className="info-label">供应商:</span><span className="info-value">{r.supplier?.name || 'N/A'}</span></div>
               <div className="info-row"><span className="info-label">日期:</span><span className="info-value">{new Date(r.requested_date).toLocaleDateString()}</span></div>
-              {r.result && (
-                <div className="info-row">
-                  <span className="info-label">结果:</span>
-                  <span className="info-value" style={{ color: r.result === 'PASS' ? '#16a34a' : '#dc2626', fontWeight: 600 }}>
-                    {r.result === 'PASS' ? '合格' : '不合格'}
-                  </span>
-                </div>
-              )}
             </div>
           ))
         )}

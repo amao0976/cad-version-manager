@@ -48,18 +48,6 @@ export default function RequestDetailScreen() {
             <span className="card-title">{request.order_number}</span>
             <span className={`badge badge-${request.status}`}>{request.status_label}</span>
           </div>
-          {request.result && (
-            <div style={{ 
-              padding: '8px 16px', 
-              borderRadius: '12px', 
-              background: request.result === 'PASS' ? '#dcfce7' : '#fee2e2',
-              color: request.result === 'PASS' ? '#16a34a' : '#dc2626',
-              fontWeight: 600,
-              display: 'inline-block'
-            }}>
-              {request.result === 'PASS' ? '合格' : '不合格'}
-            </div>
-          )}
         </div>
 
         <div className="card">

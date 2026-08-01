@@ -77,16 +77,16 @@ export default function RecordDetailScreen() {
             >
               📄 查看验货报告
             </button>
-          ) : !record.result ? (
+          ) : (
             <button
               className="btn btn-primary btn-block"
               onClick={handleCreateReport}
               disabled={isCreatingReport}
               style={{ marginTop: '10px' }}
             >
-              {isCreatingReport ? '创建中...' : '创建验货报告'}
+              {isCreatingReport ? '创建中...' : '创建验货报告（可选）'}
             </button>
-          ) : null}
+          )}
         </div>
 
         <div className="card">
