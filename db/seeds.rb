@@ -397,6 +397,16 @@ supplier = Supplier.find_or_create_by!(code: 'SUP-001') do |s|
   s.address = '深圳市宝安区钟表产业园'
 end
 
+# 供应商用户（关联到SUP-001，只能看自己的数据）
+supplier_user = User.find_or_create_by!(email: 'supplier@example.com') do |u|
+  u.password = 'password123'
+  u.password_confirmation = 'password123'
+  u.name = '深圳精钟-供应商'
+  u.role = 'supplier'
+  u.supplier = supplier
+end
+puts "  供应商账号: supplier@example.com / password123 (关联: 深圳精密钟表制造有限公司)"
+
 supplier2 = Supplier.find_or_create_by!(code: 'SUP-002') do |s|
   s.name = '广州表壳配件厂'
   s.short_name = '广州表壳'

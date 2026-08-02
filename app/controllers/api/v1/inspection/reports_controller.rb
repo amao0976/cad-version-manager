@@ -3,6 +3,7 @@ module Api
     module Inspection
       class ReportsController < BaseController
         before_action :set_report, only: [:show, :complete, :reopen, :upload_image, :remove_image, :update_notes]
+        before_action :require_qc_or_admin!, only: [:complete, :reopen, :upload_image, :remove_image, :update_notes]
 
         IMAGE_CATEGORIES = {
           'product_overview' => '产品外观',
@@ -91,6 +92,12 @@ module Api
 
         def set_report
           @report = ::Inspection::Report.find(params[:id])
+        end
+
+        def require_qc_or_admin!
+          unless current_user.inspector?
+            render json: { error: '只有QC可以执行此操作' }, status: :forbidden
+          end
         end
 
         def serialize_report(report)

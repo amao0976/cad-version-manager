@@ -3,6 +3,7 @@ module Api
     module Inspection
       class RecordsController < BaseController
         before_action :set_record, only: [:show, :update, :report, :create_report]
+        before_action :require_qc_or_admin!, only: [:create, :update, :create_report]
 
         INSPECTION_TYPES = %w[中期检查 尾期检查 首件检查 过程检查].freeze
 
@@ -21,6 +22,11 @@ module Api
         # GET /api/v1/inspection/records
         def index
           records = ::Inspection::Record.includes(:product, :supplier, :inspection_request, :report)
+
+          # 供应商只能看到自己的验货记录
+          if current_user.supplier?
+            records = records.where(supplier_id: current_user.supplier_id)
+          end
 
           if params[:status].present?
             records = records.joins(:inspection_request).where(inspection_requests: { status: params[:status] })
@@ -49,6 +55,11 @@ module Api
         
         # GET /api/v1/inspection/records/:id
         def show
+          # 供应商只能查看自己的验货记录
+          if current_user.supplier? && @record.supplier_id != current_user.supplier_id
+            render json: { error: '无权查看此验货记录' }, status: :forbidden
+            return
+          end
           render json: { data: serialize_record(@record) }
         end
 
@@ -116,6 +127,12 @@ module Api
         
         def set_record
           @record = ::Inspection::Record.find(params[:id])
+        end
+
+        def require_qc_or_admin!
+          unless current_user.inspector?
+            render json: { error: '只有QC可以执行此操作' }, status: :forbidden
+          end
         end
 
         def record_params

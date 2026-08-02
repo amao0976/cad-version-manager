@@ -3,6 +3,8 @@
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
+  ./bin/rails solid_queue:install:migrations 2>/dev/null || true
+  ./bin/rails db:migrate
   ./bin/rails db:seed
 fi
 

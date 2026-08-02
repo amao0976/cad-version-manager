@@ -3,6 +3,8 @@ module Api
     module Inspection
       class RequestsController < BaseController
         before_action :set_request, only: [:show, :schedule, :cancel]
+        before_action :require_supplier!, only: [:create]
+        before_action :require_qc_or_admin!, only: [:schedule]
 
         INSPECTION_TYPES = %w[中期检查 尾期检查 首件检查 过程检查].freeze
 
@@ -22,11 +24,16 @@ module Api
         # GET /api/v1/inspection/requests
         def index
           requests = ::Inspection::Request.includes(:supplier, :product, :items)
-          
+
+          # 供应商只能看到自己的验货申请
+          if current_user.supplier?
+            requests = requests.where(supplier_id: current_user.supplier_id)
+          end
+
           if params[:status].present?
             requests = requests.where(status: params[:status])
           end
-          
+
           if params[:keyword].present?
             keyword = "%#{params[:keyword]}%"
             requests = requests.where(
@@ -34,18 +41,23 @@ module Api
               kw: keyword
             )
           end
-          
+
           requests = requests.order(created_at: :desc)
-          
+
           paginated = paginate(requests)
           render json: {
             data: paginated[:data].map { |r| serialize_request(r) },
             meta: paginated[:meta]
           }
         end
-        
+
         # GET /api/v1/inspection/requests/:id
         def show
+          # 供应商只能查看自己的验货申请
+          if current_user.supplier? && @request.supplier_id != current_user.supplier_id
+            render json: { error: '无权查看此验货申请' }, status: :forbidden
+            return
+          end
           render json: { data: serialize_request(@request) }
         end
 
@@ -53,6 +65,8 @@ module Api
         def create
           @request = ::Inspection::Request.new(request_params)
           @request.created_by = current_user
+          # 供应商创建申请时强制绑定自己的供应商ID
+          @request.supplier_id = current_user.supplier_id if current_user.supplier?
 
           if @request.save
             render json: { data: serialize_request(@request), message: '验货申请创建成功' }, status: :created
@@ -65,7 +79,6 @@ module Api
         def schedule
           if @request.may_schedule?
             @request.schedule!
-            # 排期成功后，前端跳转到创建验货记录页面
             render json: {
               data: serialize_request(@request),
               message: '已排期，请创建验货记录',
@@ -78,6 +91,12 @@ module Api
 
         # PATCH /api/v1/inspection/requests/:id/cancel
         def cancel
+          # 供应商只能取消自己的申请，QC/Admin可以取消任何申请
+          if current_user.supplier? && @request.supplier_id != current_user.supplier_id
+            render json: { error: '无权取消此验货申请' }, status: :forbidden
+            return
+          end
+
           if @request.may_cancel?
             @request.cancel!
             render json: { data: serialize_request(@request), message: '已取消' }
@@ -90,6 +109,18 @@ module Api
         
         def set_request
           @request = ::Inspection::Request.find(params[:id])
+        end
+
+        def require_supplier!
+          unless current_user.supplier? || current_user.admin?
+            render json: { error: '只有供应商可以创建验货申请' }, status: :forbidden
+          end
+        end
+
+        def require_qc_or_admin!
+          unless current_user.inspector?
+            render json: { error: '只有QC可以执行此操作' }, status: :forbidden
+          end
         end
 
         def request_params
