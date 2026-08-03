@@ -1,11 +1,25 @@
 #!/bin/bash -e
 
-# If running the rails server then create or migrate existing database
-if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
-  ./bin/rails db:prepare
-  ./bin/rails solid_queue:install:migrations 2>/dev/null || true
-  ./bin/rails db:migrate
-  ./bin/rails db:seed
+# 等待数据库就绪
+if [ -n "$DATABASE_URL" ]; then
+  echo "等待数据库就绪..."
+  for i in $(seq 1 30); do
+    if bundle exec rails db:version >/dev/null 2>&1; then
+      echo "数据库已就绪"
+      break
+    fi
+    echo "  等待数据库... ($i/30)"
+    sleep 2
+  done
 fi
 
-exec "${@}"
+# 创建或迁移数据库 + 加载种子数据
+if [ "$RAILS_ENV" = "production" ]; then
+  echo "执行数据库迁移..."
+  bundle exec rails db:prepare
+  echo "加载种子数据..."
+  bundle exec rails db:seed
+fi
+
+# 执行传入的命令
+exec "$@"

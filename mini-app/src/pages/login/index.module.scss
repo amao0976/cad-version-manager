@@ -1,0 +1,94 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #eff6ff 0%, $color-bg-page 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 $spacing-lg;
+}
+
+.logo {
+  margin-top: 120rpx;
+  margin-bottom: $spacing-xl;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logoIcon {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: $radius-lg;
+  background: $color-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56rpx;
+  color: $color-text-white;
+  margin-bottom: $spacing-md;
+}
+
+.logoText {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.form {
+  width: 100%;
+  max-width: $max-content-width;
+}
+
+.field {
+  margin-bottom: $spacing-lg;
+}
+
+.label {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+}
+
+.input {
+  width: 100%;
+  height: 88rpx;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: 0 $spacing-lg;
+  font-size: $font-size-md;
+  box-sizing: border-box;
+  border: 2rpx solid $color-border;
+}
+
+.errorText {
+  font-size: $font-size-sm;
+  color: $color-error;
+  margin-bottom: $spacing-md;
+}
+
+.submitBtn {
+  width: 100%;
+  height: $button-height-lg;
+  background: $color-primary;
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: $spacing-lg;
+  @include button-reset;
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.hint {
+  margin-top: $spacing-xl;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  text-align: center;
+}

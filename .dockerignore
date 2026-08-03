@@ -1,45 +1,40 @@
-# See https://docs.docker.com/engine/reference/builder/#dockerignore-file for more about ignoring files.
+# Git
+.git
+.gitignore
 
-# Ignore git directory.
-/.git/
-/.gitignore
+# 依赖
+node_modules
+mini-app/node_modules
+mobile-web/node_modules
 
-# Ignore bundler config.
-/.bundle
+# 日志和临时文件
+log/*
+tmp/*
+*.log
 
-# Ignore all environment files.
-/.env*
+# 数据库文件
+db/*.sqlite3
+db/*.sqlite3-*
 
-# Ignore all default key files.
-/config/master.key
-/config/credentials/*.key
+# 开发配置
+.env
+.env.development
+.env.test
+config/master.key
 
-# Ignore all logfiles and tempfiles.
-/log/*
-/tmp/*
-!/log/.keep
-!/tmp/.keep
+# IDE
+.vscode
+.idea
 
-# Ignore pidfiles, but keep the directory.
-/tmp/pids/*
-!/tmp/pids/.keep
+# 构建产物
+mini-app/dist
+mobile-web/dist
+public/assets
 
-# Ignore storage (uploaded files in development and any SQLite databases).
-/storage/*
-!/storage/.keep
-/tmp/storage/*
-!/tmp/storage/.keep
+# 文档
+*.md
+docs/
 
-# Ignore CI service files.
-/.github
-
-# Ignore Kamal files.
-/config/deploy*.yml
-/.kamal
-
-# Ignore development files
-/.devcontainer
-
-# Ignore Docker-related files
-/.dockerignore
-/Dockerfile*
+# 系统文件
+.DS_Store
+Thumbs.db

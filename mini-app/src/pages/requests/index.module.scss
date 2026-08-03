@@ -1,0 +1,116 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  padding: $spacing-sm $spacing-lg;
+  background: $color-bg-card;
+  gap: $spacing-sm;
+}
+
+.searchInput {
+  flex: 1;
+  height: 64rpx;
+  background: $color-bg-page;
+  border-radius: $radius-round;
+  padding: 0 $spacing-lg;
+  font-size: $font-size-sm;
+}
+
+.filterTabs {
+  display: flex;
+  padding: $spacing-sm $spacing-lg;
+  background: $color-bg-card;
+  gap: $spacing-sm;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.filterTab {
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-round;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  background: $color-bg-hover;
+}
+
+.filterTabActive {
+  color: $color-text-white;
+  background: $color-primary;
+}
+
+.list {
+  padding: $spacing-sm $spacing-lg;
+}
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-sm;
+}
+
+.orderNo {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.cardBody {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.infoItem {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: $spacing-sm;
+  border-top: 1rpx solid $color-divider;
+}
+
+.date {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.fab {
+  position: fixed;
+  right: $spacing-lg;
+  bottom: 120rpx;
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: $color-primary;
+  color: $color-text-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+  box-shadow: $shadow-float;
+  z-index: 100;
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.95);
+  }
+}

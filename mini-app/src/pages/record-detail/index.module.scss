@@ -1,0 +1,135 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding: $spacing-sm $spacing-lg $spacing-xl * 2;
+}
+
+.section {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.sectionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  padding: $spacing-sm 0;
+  border-bottom: 1rpx solid $color-divider;
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.label {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.value {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  text-align: right;
+  max-width: 400rpx;
+  @include text-ellipsis;
+}
+
+.resultSection {
+  text-align: center;
+}
+
+.resultText {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  margin: $spacing-md 0;
+}
+
+.resultPass {
+  color: $color-success;
+}
+
+.resultFail {
+  color: $color-error;
+}
+
+.resultPending {
+  color: $color-warning;
+}
+
+.judgeBtns {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+}
+
+.judgeBtn {
+  flex: 1;
+  height: $button-height-md;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  @include button-reset;
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.judgePass {
+  background: $color-success;
+  color: $color-text-white;
+}
+
+.judgeFail {
+  background: $color-error;
+  color: $color-text-white;
+}
+
+.judgeReset {
+  background: $color-bg-hover;
+  color: $color-text-secondary;
+}
+
+.actionBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: $spacing-md $spacing-lg;
+  padding-bottom: calc($spacing-md + env(safe-area-inset-bottom));
+  background: $color-bg-card;
+  box-shadow: $shadow-float;
+}
+
+.reportBtn {
+  width: 100%;
+  height: $button-height-lg;
+  background: $color-primary;
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @include button-reset;
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}

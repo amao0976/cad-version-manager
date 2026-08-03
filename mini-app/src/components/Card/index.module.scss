@@ -1,0 +1,15 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.clickable {
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
