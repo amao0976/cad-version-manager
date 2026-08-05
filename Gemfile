@@ -76,7 +76,7 @@ gem "prawn-table", "~> 0.2"
 gem "aasm"
 
 # Pagination
-gem "pagy", "~> 9.4"
+gem "pagy", "~> 43.6"
 
 # Markdown rendering for documentation
 gem "redcarpet"
