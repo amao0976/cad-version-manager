@@ -65,7 +65,7 @@ gem "webdav"
 
 # Spreadsheet handling
 gem "caxlsx"
-gem "roo", "~> 2.10"
+gem "roo", "~> 3.0"
 gem "csv"
 
 # PDF generation
