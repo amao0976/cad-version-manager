@@ -1,27 +1,21 @@
 import Taro from '@tarojs/taro';
 import type { ApiResponse } from '../types';
 
-// 后端API地址 - 1Panel部署后改成你的域名
-// 示例：https://cad.example.com/api/v1
 const API_BASE_URL = 'https://cad-version-manager-production.up.railway.app/api/v1';
 
-// 获取存储的token
 function getToken(): string | null {
   return Taro.getStorageSync('auth_token') || null;
 }
 
-// 设置token
 function setToken(token: string) {
   Taro.setStorageSync('auth_token', token);
 }
 
-// 清除token
 function clearToken() {
   Taro.removeStorageSync('auth_token');
   Taro.removeStorageSync('user_data');
 }
 
-// 封装请求
 async function request<T = any>(
   method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
   url: string,
@@ -45,7 +39,7 @@ async function request<T = any>(
       timeout: 15000,
     });
 
-    if (res.statusCode === 401 && url !== '/auth/login') {
+    if (res.statusCode === 401) {
       clearToken();
       Taro.reLaunch({ url: '/pages/login/index' });
       throw new Error('登录已过期，请重新登录');
@@ -53,22 +47,16 @@ async function request<T = any>(
 
     if (res.statusCode >= 400) {
       const errMsg = res.data?.error || res.data?.message || `请求失败 (${res.statusCode})`;
-      console.error(`[API] ${method} ${url} 错误:`, errMsg);
       throw new Error(errMsg);
     }
 
     return res.data as T;
   } catch (error) {
     console.error(`[API] ${method} ${url} 异常:`, error);
-    if (error instanceof Error && error.message) {
-      throw error;
-    }
-    const errMsg = (error as any)?.errMsg || (error as any)?.message || '网络请求失败，请检查网络连接';
-    throw new Error(errMsg);
+    throw error;
   }
 }
 
-// 封装文件上传
 async function uploadFile(url: string, filePath: string, formData?: Record<string, string>) {
   const token = getToken();
   const header: Record<string, string> = {};
@@ -117,6 +105,8 @@ export const apiService = {
       request<ApiResponse<any>>('PATCH', `/inspection/requests/${id}/schedule`),
     cancel: (id: number) =>
       request<ApiResponse<any>>('PATCH', `/inspection/requests/${id}/cancel`),
+    calendar: (startDate: string, endDate: string) =>
+      request<{ data: any[] }>('GET', '/inspection/requests/calendar', { start_date: startDate, end_date: endDate }),
   },
   inspectionRecords: {
     list: (params?: Record<string, any>) =>

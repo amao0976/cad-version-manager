@@ -35,6 +35,19 @@
 # Ignore node_modules
 /node_modules/
 /mobile-web/node_modules/
+/mini-app/node_modules/
+
+# Ignore mini-app build artifacts
+/mini-app/dist/
 
 # Ignore debug logs
 /debug.log
+
+# Ignore SQLite databases
+db/*.sqlite3
+db/*.sqlite3-shm
+db/*.sqlite3-wal
+
+# Ignore environment files
+.env*
+!.env.example

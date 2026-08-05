@@ -4,6 +4,7 @@
   <h1>验货申请管理</h1>
   <div class="d-flex gap-2 mt-2 flex-wrap">
     <%= link_to '新建申请', new_inspection_request_path, class: 'btn btn-primary' %>
+    <%= link_to '日程日历', calendar_inspection_requests_path, class: 'btn btn-outline-info' %>
     <%= link_to '导出 Excel', export_inspection_requests_path, class: 'btn btn-outline-success' %>
     <button type="button" class="btn btn-outline-info" onclick="document.getElementById('importModal').style.display='block'">
       <i class="bi bi-upload"></i> 导入

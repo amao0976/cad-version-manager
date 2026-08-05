@@ -1,0 +1,275 @@
+<% content_for :title, '验货日历 - 排期管理' %>
+
+<div class="page-header mb-4">
+  <h1>验货日历</h1>
+  <div class="d-flex gap-2 mt-2 flex-wrap">
+    <%= link_to '验货申请列表', inspection_requests_path, class: 'btn btn-outline-secondary' %>
+    <%= link_to '验货记录', inspection_records_path, class: 'btn btn-outline-secondary' %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <!-- 日历控制栏 -->
+    <div class="calendar-controls d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="changePeriod(-1)">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <span id="currentPeriod" class="fw-bold"></span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="changePeriod(1)">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-primary ms-2" onclick="goToToday()">今天</button>
+      </div>
+      <div class="d-flex gap-2">
+        <div class="btn-group" role="group">
+          <input type="radio" class="btn-check" name="viewMode" id="monthView" autocomplete="off" value="month" <%= @view_mode == 'month' ? 'checked' : '' %> onchange="changeView('month')">
+          <label class="btn btn-outline-primary btn-sm" for="monthView">月视图</label>
+          <input type="radio" class="btn-check" name="viewMode" id="weekView" autocomplete="off" value="week" <%= @view_mode == 'week' ? 'checked' : '' %> onchange="changeView('week')">
+          <label class="btn btn-outline-primary btn-sm" for="weekView">周视图</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 图例 -->
+    <div class="calendar-legend d-flex gap-3 mb-3 flex-wrap">
+      <div class="d-flex align-items-center gap-1">
+        <span class="legend-color" style="background-color: #2563eb"></span>
+        <span>已排期</span>
+      </div>
+      <div class="d-flex align-items-center gap-1">
+        <span class="legend-color" style="background-color: #f59e0b"></span>
+        <span>待处理</span>
+      </div>
+    </div>
+
+    <!-- 月视图 -->
+    <div id="monthCalendar" class="calendar-container"></div>
+
+    <!-- 周视图 -->
+    <div id="weekCalendar" class="calendar-container d-none"></div>
+  </div>
+</div>
+
+<!-- 事件详情模态框 -->
+<div id="eventModal" class="modal" style="display:none">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="eventTitle"></h5>
+        <button type="button" class="btn-close" onclick="document.getElementById('eventModal').style.display='none'"></button>
+      </div>
+      <div class="modal-body" id="eventBody"></div>
+      <div class="modal-footer" id="eventFooter"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .calendar-container { min-height: 500px; }
+  .calendar-grid { display: grid; gap: 1px; background: #e5e7eb; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+  .calendar-header { background: #f3f4f6; text-align: center; padding: 8px; font-weight: 600; font-size: 13px; color: #374151; }
+  .calendar-cell { background: white; min-height: 90px; padding: 4px; position: relative; cursor: pointer; transition: background 0.15s; }
+  .calendar-cell:hover { background: #f9fafb; }
+  .calendar-cell.other-month { background: #f9fafb; color: #d1d5db; }
+  .calendar-cell.today { background: #eff6ff; }
+  .calendar-cell.selected { background: #dbeafe; outline: 2px solid #2563eb; }
+  .cell-date { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+  .event-badge { font-size: 11px; padding: 2px 4px; margin-bottom: 2px; border-radius: 4px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; display: block; }
+  .event-badge:hover { opacity: 0.9; }
+  .more-link { font-size: 11px; color: #2563eb; cursor: pointer; }
+  .legend-color { display: inline-block; width: 14px; height: 14px; border-radius: 3px; }
+  .week-day-header { background: #f3f4f6; text-align: center; padding: 8px; font-weight: 600; font-size: 13px; }
+  .time-column { background: #f9fafb; font-size: 11px; color: #6b7280; padding: 4px; width: 50px; text-align: right; }
+</style>
+
+<script>
+(function() {
+  const events = <%= raw @requests.map { |r| serialize_calendar_json(r) }.to_json %>;
+  let viewMode = '<%= @view_mode %>';
+  let currentDate = new Date('<%= @current_date %>');
+
+  const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+
+  function formatDate(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function parseDate(s) {
+    const parts = s.split('-');
+    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+  }
+
+  function isSameDay(d1, d2) {
+    return d1.getFullYear() === d2.getFullYear() &&
+           d1.getMonth() === d2.getMonth() &&
+           d1.getDate() === d2.getDate();
+  }
+
+  function renderMonth() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDayOfWeek = firstDay.getDay();
+    const totalDays = lastDay.getDate();
+    const today = new Date();
+
+    document.getElementById('currentPeriod').textContent = `${year}年${month + 1}月`;
+
+    // Previous month trailing days
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    const totalCells = Math.ceil((startDayOfWeek + totalDays) / 7) * 7;
+
+    let grid = '';
+    for (let i = 0; i < 7; i++) {
+      grid += `<div class="calendar-header">${WEEKDAYS[i]}</div>`;
+    }
+
+    for (let i = 0; i < totalCells; i++) {
+      let dayNum, cellDate, otherMonth = false;
+
+      if (i < startDayOfWeek) {
+        dayNum = prevMonthLastDay - startDayOfWeek + 1 + i;
+        cellDate = new Date(year, month - 1, dayNum);
+        otherMonth = true;
+      } else if (i >= startDayOfWeek + totalDays) {
+        dayNum = i - startDayOfWeek - totalDays + 1;
+        cellDate = new Date(year, month + 1, dayNum);
+        otherMonth = true;
+      } else {
+        dayNum = i - startDayOfWeek + 1;
+        cellDate = new Date(year, month, dayNum);
+      }
+
+      const dateStr = formatDate(cellDate);
+      const dayEvents = events.filter(e => e.start === dateStr);
+      const isToday = isSameDay(cellDate, today);
+      const cellClass = `calendar-cell${otherMonth ? ' other-month' : ''}${isToday ? ' today' : ''}`;
+
+      grid += `<div class="${cellClass}" onclick="selectCell('${dateStr}')" data-date="${dateStr}">`;
+      grid += `<div class="cell-date">${dayNum}</div>`;
+
+      const maxShow = 3;
+      dayEvents.slice(0, maxShow).forEach(ev => {
+        grid += `<span class="event-badge" style="background-color: ${ev.color}" onclick="showEvent(${ev.id})">${ev.title}</span>`;
+      });
+      if (dayEvents.length > maxShow) {
+        grid += `<span class="more-link" onclick="event.stopPropagation(); showDayEvents('${dateStr}')">+${dayEvents.length - maxShow} 更多</span>`;
+      }
+      grid += '</div>';
+    }
+
+    const container = document.getElementById('monthCalendar');
+    container.innerHTML = `<div class="calendar-grid" style="grid-template-columns: repeat(7, 1fr)">${grid}</div>`;
+  }
+
+  function renderWeek() {
+    const startOfWeek = new Date(currentDate);
+    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+    const today = new Date();
+
+    const year = startOfWeek.getFullYear();
+    const month = startOfWeek.getMonth() + 1;
+    const day = startOfWeek.getDate();
+    const endDay = startOfWeek.getDate() + 6;
+    document.getElementById('currentPeriod').textContent = `${year}年${month}月${day}日 - ${endDay}日`;
+
+    let grid = '';
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(startOfWeek);
+      d.setDate(startOfWeek.getDate() + i);
+      const dateStr = formatDate(d);
+      const dayEvents = events.filter(e => e.start === dateStr);
+      const isToday = isSameDay(d, today);
+
+      grid += `<div class="calendar-cell${isToday ? ' today' : ''}" onclick="selectCell('${dateStr}')" style="min-height: 150px">`;
+      grid += `<div class="cell-date">${WEEKDAYS[i]} ${d.getMonth() + 1}/${d.getDate()}</div>`;
+
+      dayEvents.forEach(ev => {
+        grid += `<span class="event-badge" style="background-color: ${ev.color}" onclick="showEvent(${ev.id})">${ev.title}</span>`;
+      });
+      grid += '</div>';
+    }
+
+    const container = document.getElementById('weekCalendar');
+    container.innerHTML = `<div class="calendar-grid" style="grid-template-columns: repeat(7, 1fr)">${grid}</div>`;
+  }
+
+  window.showEvent = function(id) {
+    const ev = events.find(e => e.id === id);
+    if (!ev) return;
+    const modal = document.getElementById('eventModal');
+    document.getElementById('eventTitle').textContent = ev.title;
+    document.getElementById('eventBody').innerHTML = `
+      <p><strong>状态：</strong><span style="color: ${ev.color}">${ev.status_label}</span></p>
+      <p><strong>类型：</strong>${ev.inspection_type}</p>
+      <p><strong>日期：</strong>${ev.start}</p>
+      ${ev.supplier_name ? `<p><strong>供应商：</strong>${ev.supplier_name}</p>` : ''}
+      ${ev.product_name ? `<p><strong>产品：</strong>${ev.product_name}</p>` : ''}
+      <p><strong>数量：</strong>${ev.quantity}</p>
+      ${ev.remarks ? `<p><strong>备注：</strong>${ev.remarks}</p>` : ''}
+    `;
+    document.getElementById('eventFooter').innerHTML = `<button type="button" class="btn btn-primary" onclick="window.location.href='/inspection/requests/${ev.id}'">查看详情</button>`;
+    modal.style.display = 'block';
+  };
+
+  window.showDayEvents = function(dateStr) {
+    const dayEvents = events.filter(e => e.start === dateStr);
+    const modal = document.getElementById('eventModal');
+    document.getElementById('eventTitle').textContent = `${dateStr} 的验货申请`;
+    document.getElementById('eventBody').innerHTML = dayEvents.map(ev =>
+      `<div style="padding: 8px; border-left: 3px solid ${ev.color}; margin-bottom: 8px; cursor: pointer" onclick="showEvent(${ev.id})">
+        <div style="font-weight: 600">${ev.title}</div>
+        <div style="font-size: 12px; color: #6b7280">${ev.inspection_type} · ${ev.status_label}</div>
+      </div>`
+    ).join('');
+    document.getElementById('eventFooter').innerHTML = '';
+    modal.style.display = 'block';
+  };
+
+  window.selectCell = function(dateStr) {
+    const cells = document.querySelectorAll('.calendar-cell');
+    cells.forEach(c => c.classList.remove('selected'));
+    const cell = document.querySelector(`[data-date="${dateStr}"]`);
+    if (cell) cell.classList.add('selected');
+  };
+
+  window.changePeriod = function(delta) {
+    if (viewMode === 'month') {
+      currentDate.setMonth(currentDate.getMonth() + delta);
+    } else {
+      currentDate.setDate(currentDate.getDate() + delta * 7);
+    }
+    render();
+  };
+
+  window.goToToday = function() {
+    currentDate = new Date();
+    render();
+  };
+
+  window.changeView = function(mode) {
+    viewMode = mode;
+    render();
+  };
+
+  function render() {
+    if (viewMode === 'month') {
+      document.getElementById('monthCalendar').classList.remove('d-none');
+      document.getElementById('weekCalendar').classList.add('d-none');
+      renderMonth();
+    } else {
+      document.getElementById('monthCalendar').classList.add('d-none');
+      document.getElementById('weekCalendar').classList.remove('d-none');
+      renderWeek();
+    }
+  }
+
+  render();
+})();
+</script>

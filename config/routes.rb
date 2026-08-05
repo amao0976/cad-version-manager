@@ -13,6 +13,7 @@ Rails.application.routes.draw do
         resources :requests, controller: 'requests' do
           collection do
             get :new_options
+            get :calendar
           end
           member do
             patch :schedule
@@ -95,6 +96,7 @@ Rails.application.routes.draw do
       collection do
         get :export
         post :import
+        get :calendar
       end
       member do
         patch :schedule

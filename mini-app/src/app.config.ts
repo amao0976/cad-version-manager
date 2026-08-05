@@ -1,6 +1,7 @@
 export default defineAppConfig({
   pages: [
     'pages/requests/index',
+    'pages/calendar/index',
     'pages/records/index',
     'pages/mine/index',
     'pages/login/index',
@@ -27,6 +28,12 @@ export default defineAppConfig({
         text: '验货申请',
         iconPath: 'assets/tabbar/requests.png',
         selectedIconPath: 'assets/tabbar/requests-selected.png'
+      },
+      {
+        pagePath: 'pages/calendar/index',
+        text: '日程日历',
+        iconPath: 'assets/tabbar/calendar.png',
+        selectedIconPath: 'assets/tabbar/calendar-selected.png'
       },
       {
         pagePath: 'pages/records/index',

@@ -11,6 +11,30 @@ module Inspection
       @pagy, @requests = pagy(scope, limit: 10)
     end
 
+    def calendar
+      @view_mode = params[:view] || 'month'
+      @current_date = params[:date].present? ? Date.parse(params[:date]) : Date.current
+
+      case @view_mode
+      when 'week'
+        @start_date = @current_date.beginning_of_week(:sunday)
+        @end_date = @start_date + 6.days
+      else
+        @start_date = @current_date.beginning_of_month
+        @end_date = @current_date.end_of_month
+      end
+
+      @requests = Request.includes(:supplier, :product)
+                        .where(requested_date: @start_date..@end_date)
+                        .where.not(status: 'cancelled')
+                        .order(:requested_date)
+
+      respond_to do |format|
+        format.html
+        format.json { render json: @requests.map { |r| serialize_calendar_json(r) } }
+      end
+    end
+
     def show
       @items = @request.items.order(created_at: :asc)
     end
@@ -213,6 +237,26 @@ module Inspection
       when Numeric then Date.new(1899, 12, 30) + value.to_i
       else Date.parse(value.to_s) rescue nil
       end
+    end
+
+    helper_method :serialize_calendar_json
+
+    def serialize_calendar_json(request)
+      {
+        id: request.id,
+        title: "#{request.order_number} - #{request.style_number}",
+        start: request.requested_date.to_s,
+        end: request.requested_date.to_s,
+        allDay: true,
+        color: request.status == 'scheduled' ? '#2563eb' : '#f59e0b',
+        status: request.status,
+        status_label: request.status_label,
+        inspection_type: request.inspection_type,
+        supplier_name: request.supplier_name || request.supplier&.name,
+        product_name: request.product&.name,
+        quantity: request.quantity,
+        remarks: request.remarks
+      }
     end
 
     def request_params

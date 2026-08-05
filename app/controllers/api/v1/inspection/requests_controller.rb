@@ -21,6 +21,25 @@ module Api
           }
         end
 
+        # GET /api/v1/inspection/requests/calendar
+        def calendar
+          start_date = params[:start_date].present? ? Date.parse(params[:start_date]) : Date.current.beginning_of_month
+          end_date = params[:end_date].present? ? Date.parse(params[:end_date]) : Date.current.end_of_month
+
+          requests = ::Inspection::Request.includes(:supplier, :product)
+            .where(requested_date: start_date..end_date)
+
+          if current_user.supplier?
+            requests = requests.where(supplier_id: current_user.supplier_id)
+          end
+
+          requests = requests.where.not(status: 'cancelled')
+
+          render json: {
+            data: requests.map { |r| serialize_calendar_event(r) }
+          }
+        end
+
         # GET /api/v1/inspection/requests
         def index
           requests = ::Inspection::Request.includes(:supplier, :product, :items)
@@ -163,6 +182,24 @@ module Api
             inspection_level: item.inspection_level,
             aql_level: item.aql_level,
             sample_size: item.sample_size
+          }
+        end
+
+        def serialize_calendar_event(request)
+          {
+            id: request.id,
+            title: "#{request.order_number} - #{request.style_number}",
+            start: request.requested_date.to_s,
+            end: request.requested_date.to_s,
+            allDay: true,
+            color: request.status == 'scheduled' ? '#2563eb' : '#f59e0b',
+            status: request.status,
+            status_label: request.status_label,
+            inspection_type: request.inspection_type,
+            supplier: request.supplier ? { id: request.supplier.id, name: request.supplier.name } : nil,
+            product: request.product ? { id: request.product.id, name: request.product.name } : nil,
+            quantity: request.quantity,
+            remarks: request.remarks
           }
         end
       end

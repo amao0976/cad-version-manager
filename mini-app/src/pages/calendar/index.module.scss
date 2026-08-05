@@ -1,0 +1,260 @@
+.page {
+  padding: 24rpx;
+  background: #f5f6fa;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+  padding: 24rpx;
+  background: white;
+  border-radius: 16rpx;
+}
+
+.navBtn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 50%;
+  font-size: 32rpx;
+  color: #333;
+}
+
+.periodTitle {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.todayBtn {
+  padding: 8rpx 24rpx;
+  background: #2563eb;
+  color: white;
+  border-radius: 24rpx;
+  font-size: 24rpx;
+}
+
+.viewToggle {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+  padding: 8rpx;
+  background: white;
+  border-radius: 16rpx;
+}
+
+.toggleBtn {
+  flex: 1;
+  padding: 16rpx;
+  text-align: center;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.toggleBtnActive {
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+}
+
+.legend {
+  display: flex;
+  gap: 32rpx;
+  margin-bottom: 24rpx;
+  padding: 16rpx 24rpx;
+  background: white;
+  border-radius: 12rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.legendDot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 4rpx;
+}
+
+/* 月视图 */
+.monthHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: #f0f0f0;
+  border-radius: 12rpx 12rpx 0 0;
+  overflow: hidden;
+}
+
+.monthHeaderCell {
+  padding: 16rpx 0;
+  text-align: center;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #666;
+}
+
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: #e5e7eb;
+  border-radius: 0 0 12rpx 12rpx;
+  overflow: hidden;
+}
+
+.monthCell {
+  background: white;
+  min-height: 120rpx;
+  padding: 8rpx;
+  position: relative;
+  border: 1rpx solid #e5e7eb;
+}
+
+.monthCellOther {
+  background: #f9fafb;
+  color: #ccc;
+}
+
+.monthCellToday {
+  background: #eff6ff;
+}
+
+.monthCellSelected {
+  outline: 3rpx solid #2563eb;
+}
+
+.cellDate {
+  font-size: 22rpx;
+  font-weight: 600;
+  margin-bottom: 4rpx;
+}
+
+.eventDot {
+  font-size: 18rpx;
+  padding: 4rpx 6rpx;
+  margin-bottom: 4rpx;
+  border-radius: 6rpx;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.moreLink {
+  font-size: 20rpx;
+  color: #2563eb;
+}
+
+/* 周视图 */
+.weekContainer {
+  display: flex;
+  gap: 8rpx;
+  background: #e5e7eb;
+  border-radius: 12rpx;
+  overflow-x: auto;
+  padding: 8rpx;
+}
+
+.weekColumn {
+  flex: 1;
+  min-width: 140rpx;
+  background: white;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.weekHeader {
+  padding: 12rpx 8rpx;
+  text-align: center;
+  background: #f0f0f0;
+  font-size: 22rpx;
+  color: #666;
+  font-weight: 600;
+}
+
+.weekHeaderToday {
+  background: #2563eb;
+  color: white;
+}
+
+.weekBody {
+  min-height: 300rpx;
+  padding: 8rpx;
+}
+
+/* 事件列表 */
+.eventList {
+  margin-top: 24rpx;
+  background: white;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.eventListHeader {
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.eventItem {
+  padding: 20rpx 24rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.eventItem:last-child {
+  border-bottom: none;
+}
+
+.eventColor {
+  width: 8rpx;
+  height: 60rpx;
+  border-radius: 4rpx;
+  flex-shrink: 0;
+}
+
+.eventInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.eventTitle {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 6rpx;
+}
+
+.eventMeta {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.emptyState {
+  padding: 48rpx;
+  text-align: center;
+  color: #999;
+  font-size: 26rpx;
+}
+
+.loadingState {
+  padding: 48rpx;
+  text-align: center;
+  color: #999;
+  font-size: 26rpx;
+}
